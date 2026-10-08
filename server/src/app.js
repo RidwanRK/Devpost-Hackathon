@@ -4,13 +4,13 @@ import { createPlanRouter } from './routes/plan.js';
 import { HttpError } from './services/planService.js';
 import { PlanFailedError } from './services/planWorkflow.js';
 
-export function createApp({ service, clientOrigin = 'http://localhost:3000' }) {
+export function createApp({ service, replanService, clientOrigin = 'http://localhost:3000' }) {
   const app = express();
   app.use(cors({ origin: clientOrigin }));
   app.use(express.json());
 
   app.get('/api/health', (_req, res) => res.json({ ok: true }));
-  app.use('/api', createPlanRouter(service));
+  app.use('/api', createPlanRouter(service, replanService));
 
   // Express 5 forwards errors from async handlers here.
   app.use((err, _req, res, _next) => {

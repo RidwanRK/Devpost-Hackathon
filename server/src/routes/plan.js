@@ -1,7 +1,7 @@
 // Thin Express handlers: read the request, call the service, return JSON. No business rules here.
 import { Router } from 'express';
 
-export function createPlanRouter(service) {
+export function createPlanRouter(service, replanService) {
   const router = Router();
 
   router.get('/plan', async (_req, res) => {
@@ -22,6 +22,18 @@ export function createPlanRouter(service) {
 
   router.post('/demo/advance-day', async (_req, res) => {
     res.json({ plan: await service.advanceDay() });
+  });
+
+  router.post('/replan', async (req, res) => {
+    res.json({ plan: await replanService.replan({ treatUnconfirmedAsMissed: req.body?.treatUnconfirmedAsMissed === true }) });
+  });
+
+  router.post('/replan/accept', async (_req, res) => {
+    res.json({ plan: await replanService.accept() });
+  });
+
+  router.post('/replan/discard', async (_req, res) => {
+    res.json({ plan: await replanService.discard() });
   });
 
   router.delete('/plan', async (_req, res) => {

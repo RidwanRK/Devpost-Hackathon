@@ -30,5 +30,8 @@ export const api = {
   generatePlan: () => request('POST', '/plan/generate'),
   updateSession: (id, update) => request('PATCH', `/sessions/${id}`, update),
   advanceDay: () => request('POST', '/demo/advance-day'),
+  replan: (treatUnconfirmedAsMissed) => request('POST', '/replan', { treatUnconfirmedAsMissed }),
+  acceptReplan: () => request('POST', '/replan/accept'),
+  discardReplan: () => request('POST', '/replan/discard'),
   startOver: () => request('DELETE', '/plan'),
 };

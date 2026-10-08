@@ -39,7 +39,7 @@ Build mode: fast
   Learner check: Mark one session Partially Completed with some time and a new confidence, advance the demo clock a day, and confirm an unmarked session now says Unconfirmed and your marked ones kept their status after a refresh.
   Commit: `Add session tracking, demo clock and Unconfirmed state`
 
-- [ ] **4. Replan the canonical scenario and accept the revised plan**
+- [x] **4. Replan the canonical scenario and accept the revised plan**
   Becomes usable: The unique kernel. Day 1 Transaction Scheduling is missed; Replan My Schedule shows the Unconfirmed confirmation step, then (after a loading state) only the affected sessions original → revised, the Not scheduled topic with its reason, the app-calculated 6 hours needed vs. 4 available, and the AI's explanation; Accept swaps the plan, Keep original discards it.
   Why now: This is the reason the product exists, and it is the most AI-dependent part. It comes straight after the pieces it needs, ahead of any polish or secondary features, so the kernel is proven early.
   PRD ref: `prd.md > Replan My Schedule`, `prd.md > Unconfirmed sessions`, `prd.md > Not enough time (honest trade-offs)`, `prd.md > Canonical Demo Scenario`

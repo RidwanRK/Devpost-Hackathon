@@ -3,6 +3,7 @@ import mongoose from 'mongoose';
 import { createApp } from './app.js';
 import { mongoStore } from './models/StudyPlan.js';
 import { createPlanService } from './services/planService.js';
+import { createReplanService } from './services/replan.js';
 import { proposePlan } from './services/aiPlanner.js';
 
 const { MONGODB_URI, PORT = 4000, CLIENT_ORIGIN = 'http://localhost:3000' } = process.env;
@@ -20,6 +21,7 @@ try {
 }
 
 const service = createPlanService({ store: mongoStore, propose: proposePlan });
-createApp({ service, clientOrigin: CLIENT_ORIGIN }).listen(PORT, () => {
+const replanService = createReplanService({ store: mongoStore, propose: proposePlan });
+createApp({ service, replanService, clientOrigin: CLIENT_ORIGIN }).listen(PORT, () => {
   console.log(`StudyFlow API listening on http://localhost:${PORT}`);
 });

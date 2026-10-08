@@ -42,7 +42,7 @@ export const SetupSchema = z.object({
 });
 
 // What the website receives: the stored document without database internals.
-function toClient(plan) {
+export function toClient(plan) {
   const { _id, __v, key, ...rest } = plan;
   return rest;
 }

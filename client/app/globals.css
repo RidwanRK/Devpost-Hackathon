@@ -117,3 +117,17 @@ ul.plain li { padding: 4px 0; }
   .field.small { width: calc(50% - 5px); }
   .session-main { align-items: flex-start; flex-direction: column; gap: 6px; }
 }
+
+/* Replan */
+.section-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 12px; }
+.section-head h2 { margin: 0; }
+.dialog { margin-top: 28px; }
+.loading { text-align: center; padding: 48px 0; }
+.numbers { background: #fff; border: 1px solid var(--line); border-radius: 6px; padding: 10px 14px; }
+.change { display: flex; gap: 20px; align-items: flex-start; margin-top: 10px; font-size: 0.92rem; }
+.change > div:not(.arrow) { flex: 1; }
+.change-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--ink-soft); }
+.arrow { color: var(--ink-soft); padding-top: 18px; }
+.inline-chip { margin-left: 8px; font-size: 0.7rem; }
+.nav .btn { flex-shrink: 0; }
+.nav { flex-wrap: wrap; }

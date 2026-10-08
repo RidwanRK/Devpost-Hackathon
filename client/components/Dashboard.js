@@ -1,14 +1,45 @@
 'use client';
 
+import { useState } from 'react';
+import { api } from '../lib/api';
 import { daysBetween, formatDate, formatMinutes } from '../lib/format';
 import SessionCard from './SessionCard';
 import StartOver from './StartOver';
 import DemoClockControl from './DemoClockControl';
+import ReplanConfirmDialog from './ReplanConfirmDialog';
 
 // Today's sessions are the main focus; the overview shows the rest up to the last exam.
 export default function Dashboard({ data, onChange }) {
   const { plan, today, unconfirmedIds } = data;
   const unconfirmed = new Set(unconfirmedIds);
+  const [phase, setPhase] = useState('idle'); // idle | confirm | loading
+  const [confirmIds, setConfirmIds] = useState([]);
+  const [lastChoice, setLastChoice] = useState(false);
+  const [replanError, setReplanError] = useState('');
+
+  function startReplan() {
+    setReplanError('');
+    if (unconfirmedIds.length > 0) {
+      setConfirmIds(unconfirmedIds);
+      setPhase('confirm');
+    } else {
+      runReplan(false);
+    }
+  }
+
+  // On success the plan now carries a pending proposal and the app shell shows the review.
+  async function runReplan(treatUnconfirmedAsMissed) {
+    setLastChoice(treatUnconfirmedAsMissed);
+    setReplanError('');
+    setPhase('loading');
+    try {
+      await api.replan(treatUnconfirmedAsMissed);
+      await onChange();
+    } catch (err) {
+      setReplanError(err.message);
+      setPhase('idle');
+    }
+  }
 
   const topics = new Map();
   for (const s of plan.subjects) {
@@ -35,6 +66,35 @@ export default function Dashboard({ data, onChange }) {
     />
   );
 
+  if (phase === 'loading') {
+    return (
+      <main className="page narrow">
+        <h1 className="brand">StudyFlow AI</h1>
+        <section className="loading" role="status">
+          <h2>Rebuilding your plan…</h2>
+          <p className="muted">
+            Looking at what you actually did, what&apos;s left, and the time you have. This can take a few seconds.
+          </p>
+        </section>
+      </main>
+    );
+  }
+
+  if (phase === 'confirm') {
+    return (
+      <main className="page narrow">
+        <h1 className="brand">StudyFlow AI</h1>
+        <ReplanConfirmDialog
+          sessionIds={confirmIds}
+          data={data}
+          onChange={onChange}
+          onReplan={runReplan}
+          onCancel={() => setPhase('idle')}
+        />
+      </main>
+    );
+  }
+
   return (
     <main className="page">
       <header className="topbar">
@@ -54,7 +114,16 @@ export default function Dashboard({ data, onChange }) {
       )}
 
       <section>
-        <h2>Today · {formatDate(today)}</h2>
+        <div className="section-head">
+          <h2>Today · {formatDate(today)}</h2>
+          <button className="btn primary" onClick={startReplan}>Replan My Schedule</button>
+        </div>
+        {replanError && (
+          <div className="notice" role="alert">
+            {replanError}{' '}
+            <button className="btn small" onClick={() => runReplan(lastChoice)}>Retry</button>
+          </div>
+        )}
         {todays.length > 0 ? (
           <ul className="sessions">{todays.map(card)}</ul>
         ) : (
