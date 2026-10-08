@@ -28,5 +28,7 @@ export const api = {
   getPlan: () => request('GET', '/plan'),
   saveSetup: (setup) => request('PUT', '/setup', setup),
   generatePlan: () => request('POST', '/plan/generate'),
+  updateSession: (id, update) => request('PATCH', `/sessions/${id}`, update),
+  advanceDay: () => request('POST', '/demo/advance-day'),
   startOver: () => request('DELETE', '/plan'),
 };

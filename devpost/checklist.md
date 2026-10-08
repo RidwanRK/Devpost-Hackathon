@@ -29,7 +29,7 @@ Build mode: fast
   Learner check: Run `npm run dev`, open http://localhost:3000, enter the canonical Database Systems scenario, generate the plan, refresh the page, and tell me whether it looks and feels the way you pictured it.
   Commit: `Add setup flow, plan generation and saved dashboard`
 
-- [ ] **3. Mark sessions and watch missed ones become Unconfirmed**
+- [x] **3. Mark sessions and watch missed ones become Unconfirmed**
   Becomes usable: On the dashboard each session can be marked Completed, Skipped or Partially Completed, with actual time and an updated confidence. A Demo clock button advances the app date by one day, and a past, unmarked session then shows as Unconfirmed.
   Why now: The replan needs real progress to react to, and the Demo clock is how the canonical "Day 1 missed, Day 2 replan" scene can exist in one sitting. It has to be in place before the kernel is built.
   PRD ref: `prd.md > Session tracking`, `prd.md > Unconfirmed sessions` (display), `prd.md > Canonical Demo Scenario` (What goes wrong)
@@ -81,7 +81,7 @@ Build mode: fast
 
 ## Hands-on Checkpoints
 
-- [ ] Early usable behavior explored — after slice 2 (setup to saved dashboard in the browser)
+- [x] Early usable behavior explored — after slice 2 (setup to saved dashboard in the browser)
 - [ ] Core journey explored — after slice 4 (first time the unique kernel works end to end)
 - [ ] Final kick-the-tires exploration and feedback completed
 

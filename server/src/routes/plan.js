@@ -16,6 +16,14 @@ export function createPlanRouter(service) {
     res.json({ plan: await service.generate() });
   });
 
+  router.patch('/sessions/:id', async (req, res) => {
+    res.json({ plan: await service.updateSession(req.params.id, req.body) });
+  });
+
+  router.post('/demo/advance-day', async (_req, res) => {
+    res.json({ plan: await service.advanceDay() });
+  });
+
   router.delete('/plan', async (_req, res) => {
     await service.clear();
     res.json({ ok: true });

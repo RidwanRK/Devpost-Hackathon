@@ -4,6 +4,7 @@ import { randomUUID } from 'node:crypto';
 import { z } from 'zod';
 import { appDate, buildPlanningContext, isUnconfirmed } from './scheduling.js';
 import { getValidProposal } from './planWorkflow.js';
+import { SessionUpdateSchema, applySessionUpdate } from './sessionRules.js';
 
 export class HttpError extends Error {
   constructor(status, code, message) {
@@ -122,6 +123,35 @@ export function createPlanService({ store, propose, now = () => new Date() }) {
         pendingReplan: null,
       });
       return toClient(saved);
+    },
+
+    // Record what happened in a session. A confidence update also updates the topic, so the
+    // next replan uses the student's latest sense of the topic.
+    async updateSession(id, body) {
+      const parsed = SessionUpdateSchema.safeParse(body);
+      if (!parsed.success) throw new HttpError(400, 'invalid_session', 'That update is not valid.');
+      const plan = await store.load();
+      const index = plan?.sessions.findIndex((s) => s.id === id) ?? -1;
+      if (index === -1) throw new HttpError(404, 'no_session', 'That session no longer exists.');
+      const result = applySessionUpdate(plan.sessions[index], parsed.data);
+      if (result.error) throw new HttpError(400, 'invalid_session', result.error);
+      plan.sessions[index] = result.session;
+      if (result.session.confidenceAfter !== null) {
+        for (const subject of plan.subjects) {
+          for (const topic of subject.topics) {
+            if (topic.id === result.session.topicId) topic.confidence = result.session.confidenceAfter;
+          }
+        }
+      }
+      return toClient(await store.save(plan));
+    },
+
+    // Demo clock: move the app date forward one day so "Day 1 missed, replan on Day 2" can be shown.
+    async advanceDay() {
+      const plan = await store.load();
+      if (!plan) throw new HttpError(404, 'no_setup', 'Set up your subjects first.');
+      plan.demoDayOffset += 1;
+      return toClient(await store.save(plan));
     },
 
     async clear() {

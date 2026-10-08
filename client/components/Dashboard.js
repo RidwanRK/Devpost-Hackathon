@@ -3,6 +3,7 @@
 import { daysBetween, formatDate, formatMinutes } from '../lib/format';
 import SessionCard from './SessionCard';
 import StartOver from './StartOver';
+import DemoClockControl from './DemoClockControl';
 
 // Today's sessions are the main focus; the overview shows the rest up to the last exam.
 export default function Dashboard({ data, onChange }) {
@@ -14,6 +15,7 @@ export default function Dashboard({ data, onChange }) {
     for (const t of s.topics) topics.set(t.id, { topic: t, subjectName: s.name });
   }
 
+  const earlier = plan.sessions.filter((s) => s.date < today);
   const todays = plan.sessions.filter((s) => s.date === today);
   const upcoming = plan.sessions.filter((s) => s.date > today);
   const byDate = Map.groupBy(upcoming, (s) => s.date);
@@ -28,6 +30,8 @@ export default function Dashboard({ data, onChange }) {
       topic={topics.get(s.topicId)?.topic}
       subjectName={topics.get(s.topicId)?.subjectName}
       unconfirmed={unconfirmed.has(s.id)}
+      canRecord={s.date <= today}
+      onChange={onChange}
     />
   );
 
@@ -36,13 +40,21 @@ export default function Dashboard({ data, onChange }) {
       <header className="topbar">
         <h1 className="brand">StudyFlow AI</h1>
         <div className="topbar-right">
-          <span className="muted">Today · {formatDate(today)}</span>
           <StartOver onDone={onChange} />
         </div>
       </header>
 
+      <DemoClockControl today={today} daysAdvanced={plan.demoDayOffset} onChange={onChange} />
+
+      {earlier.length > 0 && (
+        <section>
+          <h2>Earlier</h2>
+          <ul className="sessions">{earlier.map(card)}</ul>
+        </section>
+      )}
+
       <section>
-        <h2>Today</h2>
+        <h2>Today · {formatDate(today)}</h2>
         {todays.length > 0 ? (
           <ul className="sessions">{todays.map(card)}</ul>
         ) : (

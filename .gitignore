@@ -9,3 +9,4 @@
 # Dependencies and build output
 node_modules/
 .next/
+!.env.local.example
