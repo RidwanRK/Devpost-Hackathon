@@ -1,0 +1,11 @@
+{
+  "name": "studyflow-ai",
+  "version": "0.1.0",
+  "private": true,
+  "description": "AI study planner that adapts when you fall behind",
+  "type": "module",
+  "workspaces": ["server"],
+  "scripts": {
+    "test": "npm test --workspace server"
+  }
+}

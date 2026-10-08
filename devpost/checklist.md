@@ -9,7 +9,7 @@ Build mode: fast
 
 ## Slices
 
-- [ ] **1. The AI's plan is proven, and a bad plan is rejected**
+- [x] **1. The AI's plan is proven, and a bad plan is rejected**
   Becomes usable: A runnable proof, from the terminal, that the canonical scenario (Database Systems, 6 hours needed, 3 days of 2 hours) goes to Gemini, comes back as valid JSON, passes the validator, and that a deliberately broken answer is rejected with the specific rule named.
   Why now: The AI call is the biggest unknown and the whole learning goal. If Gemini's free tier, model name, or structured-output shape doesn't behave as the spec assumed, we find out before building anything on top of it. Project bootstrap lives here (root and `server/` packages, env handling) instead of being its own step.
   PRD ref: `prd.md > Plan generation`, `prd.md > Replan My Schedule` (Who decides what, the enforced rules), `prd.md > Canonical Demo Scenario`
@@ -103,3 +103,5 @@ Activity mode: [live app and editor, explicit static fallback, focused alternati
 
 ## Revisions
 
+- Default Gemini model changed from `gemini-2.5-flash` to `gemini-3.5-flash-lite`, and the structured-output config is `responseMimeType` plus `responseJsonSchema` — the build found the 2.5 models are access-restricted for new users; the live smoke run confirmed the new default returns valid JSON for the canonical scenario. Still one line to change via `GEMINI_MODEL`.
+- Study days run from today up to the day before the last exam (the exam day is not a study day), and work already done today reduces that day's availability — needed so the canonical "Day 4 exam, 3 days of 2 hours" fits exactly.
