@@ -1,0 +1,536 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>StudyFlow AI — PRD</title>
+<style>
+  :root {
+    --bg: #faf7f2; --surface: #fffdf9; --ink: #14233f; --muted: #5d6881; --line: #e8e2d6;
+    --teal: #1f8a78; --teal-soft: #e0f1ed; --amber: #b7791f; --amber-soft: #fbf0dc;
+    --red: #b83a4b; --red-soft: #f9e5e8; --navy-soft: #e9edf5;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #0f1a2e; --surface: #16233b; --ink: #eef1f7; --muted: #a3afc7; --line: #26355a;
+      --teal: #4fd1b8; --teal-soft: #123a38; --amber: #f0b44d; --amber-soft: #3a2e14;
+      --red: #ff7d90; --red-soft: #3c1b25; --navy-soft: #1c2c4b; }
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { margin: 0; background: var(--bg); color: var(--ink); line-height: 1.6;
+    font: 16px/1.6 "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  .wrap { max-width: 980px; margin: 0 auto; padding: 0 16px 80px; }
+  code { background: var(--navy-soft); padding: 1px 6px; border-radius: 6px; font-size: .9em; }
+
+  header { padding: 48px 0 20px; }
+  .badge { display: inline-block; font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+    background: var(--amber-soft); color: var(--amber); padding: 4px 10px; border-radius: 999px; }
+  h1 { font-size: clamp(2rem, 5vw, 2.8rem); letter-spacing: -.02em; line-height: 1.1; margin: 14px 0 8px; }
+  .tagline { color: var(--muted); font-size: 1.1rem; max-width: 660px; margin: 0; }
+  .expand { margin-top: 18px; padding: 14px 16px; border: 1px dashed var(--line); border-radius: 12px; color: var(--muted); font-size: 15px; }
+  .expand b { color: var(--ink); }
+
+  nav { position: sticky; top: 0; z-index: 5; background: color-mix(in srgb, var(--bg) 90%, transparent); backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--line); margin: 0 -16px 28px; padding: 10px 16px; }
+  nav ul { list-style: none; display: flex; gap: 4px; margin: 0; padding: 0; overflow-x: auto; }
+  nav a { display: block; white-space: nowrap; text-decoration: none; color: var(--muted); font-size: 14px; font-weight: 500; padding: 6px 12px; border-radius: 999px; }
+  nav a:hover, nav a:focus-visible { background: var(--teal-soft); color: var(--teal); outline: none; }
+
+  section { margin: 0 0 44px; scroll-margin-top: 70px; }
+  h2 { font-size: 1.4rem; letter-spacing: -.01em; margin: 0 0 4px; }
+  .sub { color: var(--muted); margin: 0 0 16px; }
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 20px; }
+  .grid { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+  .ref { font-size: 12px; color: var(--muted); }
+
+  /* journey */
+  svg { width: 100%; height: auto; display: block; }
+  svg text { font-family: inherit; }
+  .n { fill: var(--surface); stroke: var(--line); stroke-width: 1.5; cursor: pointer; transition: all .15s; }
+  .n.setup { stroke: var(--teal); }
+  .n.replan { stroke: var(--amber); }
+  .n.active { fill: var(--teal); stroke: var(--teal); }
+  .n.active.replan { fill: var(--amber); stroke: var(--amber); }
+  .nt { fill: var(--ink); font-size: 12.5px; font-weight: 600; pointer-events: none; text-anchor: middle; }
+  .n.active + .nt, .nt.on { fill: #fff; }
+  .num { fill: var(--muted); font-size: 11px; text-anchor: middle; pointer-events: none; }
+  .arrow { stroke: var(--muted); stroke-width: 1.6; fill: none; }
+  .loopback { stroke: var(--amber); stroke-width: 2; fill: none; stroke-dasharray: 5 4; }
+  .lbl { fill: var(--amber); font-size: 12px; font-weight: 600; text-anchor: middle; }
+  .stepper { margin-top: 14px; }
+  .step-nav { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+  button.btn { font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; padding: 8px 14px; border-radius: 10px;
+    border: 1px solid var(--line); background: var(--surface); color: var(--ink); }
+  button.btn:hover { border-color: var(--teal); }
+  button.btn:focus-visible { outline: 3px solid var(--teal-soft); outline-offset: 2px; }
+  .step-panel { padding: 14px 16px; border-radius: 12px; background: var(--navy-soft); }
+  .step-panel h3 { margin: 0 0 4px; font-size: 1.02rem; }
+  .step-panel p { margin: 0; color: var(--muted); }
+  .js .step-panel[hidden] { display: none; }
+
+  /* tabs / screens */
+  .tabs { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
+  .tabs button { font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; padding: 8px 14px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface); color: var(--muted); }
+  .tabs button[aria-selected="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+  .tabs button:focus-visible { outline: 3px solid var(--teal-soft); outline-offset: 2px; }
+  .js .tabpanel[hidden] { display: none; }
+  .mock { border: 1px solid var(--line); border-radius: 12px; background: var(--bg); padding: 14px; }
+  .mock .row { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 9px 12px; margin: 6px 0; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; font-size: 14px; }
+  .mock .row small { display: block; color: var(--muted); }
+  .chip { font-size: 11px; font-weight: 700; padding: 2px 9px; border-radius: 999px; white-space: nowrap; }
+  .c-ok { background: var(--teal-soft); color: var(--teal); }
+  .c-warn { background: var(--amber-soft); color: var(--amber); }
+  .c-bad { background: var(--red-soft); color: var(--red); }
+  .c-neutral { background: var(--navy-soft); color: var(--muted); }
+  .mock h4 { margin: 4px 0 6px; font-size: .8rem; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+  .btn-mock { display: inline-block; font-size: 13px; font-weight: 600; background: var(--teal); color: #fff; padding: 6px 12px; border-radius: 8px; margin: 4px 6px 0 0; }
+  .btn-mock.sec { background: transparent; color: var(--ink); border: 1px solid var(--line); }
+  ul.plain { margin: 8px 0 0; padding-left: 20px; }
+
+  /* behaviours */
+  details { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; margin: 0 0 10px; overflow: hidden; }
+  summary { cursor: pointer; list-style: none; padding: 14px 16px; font-weight: 600; display: flex; align-items: center; gap: 10px; }
+  summary::-webkit-details-marker { display: none; }
+  summary::after { content: "+"; margin-left: auto; font-size: 22px; color: var(--muted); line-height: 1; }
+  details[open] > summary::after { content: "–"; }
+  summary:focus-visible { outline: 3px solid var(--teal-soft); outline-offset: -3px; }
+  .dbody { padding: 0 16px 16px; border-top: 1px solid var(--line); }
+  .dbody p { margin: 12px 0 0; }
+  .crit { list-style: none; margin: 10px 0 0; padding: 0; display: grid; gap: 6px; }
+  .crit li { display: flex; gap: 9px; align-items: flex-start; font-size: 15px; }
+  .crit li::before { content: ""; flex: none; width: 16px; height: 16px; border: 2px solid var(--teal); border-radius: 4px; margin-top: 4px; }
+  .tag-kernel { font-size: 11px; font-weight: 700; background: var(--amber-soft); color: var(--amber); padding: 2px 8px; border-radius: 999px; }
+  .quote { border-left: 4px solid var(--amber); padding: 2px 0 2px 14px; margin: 12px 0 0; color: var(--muted); font-style: italic; }
+
+  /* states */
+  .state { padding: 14px 16px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); }
+  .state b { display: block; margin-bottom: 2px; }
+  .state p { margin: 0; color: var(--muted); font-size: 15px; }
+  .state.good { border-left: 4px solid var(--teal); }
+  .state.warn { border-left: 4px solid var(--amber); }
+  .state.bad { border-left: 4px solid var(--red); }
+
+  /* now/deferred */
+  .cols { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+  .pill { font-size: 12px; font-weight: 700; padding: 3px 10px; border-radius: 999px; text-transform: uppercase; letter-spacing: .05em; }
+
+  .next { border-color: var(--teal); background: var(--teal-soft); }
+  footer { color: var(--muted); font-size: 13px; text-align: center; margin-top: 48px; }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } .n { transition: none; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <span class="badge" style="background:var(--teal-soft);color:var(--teal)">PRD · Approved</span>
+  <h1>StudyFlow AI — Product Requirements</h1>
+  <p class="tagline">What the proof of concept does, screen by screen, and how you'll know it works.</p>
+  <div class="expand"><b>Scope said:</b> “click Replan My Schedule and the plan adapts.” <b>Now we know exactly what that means:</b> a loading state, a revised plan beside the old one, plain-language reasons for every move, Accept / Keep original, a “Not scheduled” list when time is short, and safe handling when the AI fails or you're already on track.</div>
+</header>
+
+<nav aria-label="Sections">
+  <ul>
+    <li><a href="#journey">Journey</a></li>
+    <li><a href="#screens">Screens</a></li>
+    <li><a href="#look">Look &amp; feel</a></li>
+    <li><a href="#behavior">Behavior &amp; criteria</a></li>
+    <li><a href="#states">States</a></li>
+    <li><a href="#demo">Demo scenario</a></li>
+    <li><a href="#boundary">Building vs. deferred</a></li>
+    <li><a href="#open">Open questions</a></li>
+    <li><a href="#review">Review</a></li>
+  </ul>
+</nav>
+
+<section id="critical">
+  <div class="card" style="border-left:4px solid var(--amber)">
+    <h2>POC critical path</h2>
+    <p style="margin:6px 0 0"><b>Setup → Generate Plan → Miss / Partially Complete a Session → Replan → Review Affected Sessions + Explanation → Accept Revised Plan</b></p>
+    <p class="ref" style="margin:6px 0 0">If time runs short, protect this path first.</p>
+  </div>
+</section>
+
+<!-- ============ JOURNEY ============ -->
+<section id="journey">
+  <h2>The core journey</h2>
+  <p class="sub">Click a step in the diagram, or use Back / Next. <span class="ref">Source: scope.md &gt; The Core Loop</span></p>
+  <div class="card">
+    <svg viewBox="0 0 900 250" role="img" aria-labelledby="jt jd">
+      <title id="jt">Eight-step core journey</title>
+      <desc id="jd">Arrive, set up, see the plan, work the plan, fall behind, replan, decide, success. A dashed loop leads from decide back to work the plan.</desc>
+      <defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="var(--muted)"/></marker>
+        <marker id="ah2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="var(--amber)"/></marker></defs>
+      <!-- row 1: 1-4 setup -->
+      <g data-step="0"><rect class="n setup" x="20" y="30" width="190" height="64" rx="12"/><text class="nt" x="115" y="68">Arrive</text><text class="num" x="115" y="48">1</text></g>
+      <g data-step="1"><rect class="n setup" x="250" y="30" width="190" height="64" rx="12"/><text class="nt" x="345" y="68">Set up step by step</text><text class="num" x="345" y="48">2</text></g>
+      <g data-step="2"><rect class="n setup" x="480" y="30" width="190" height="64" rx="12"/><text class="nt" x="575" y="68">See the plan</text><text class="num" x="575" y="48">3</text></g>
+      <g data-step="3"><rect class="n" x="710" y="30" width="170" height="64" rx="12"/><text class="nt" x="795" y="68">Work the plan</text><text class="num" x="795" y="48">4</text></g>
+      <!-- row 2: 5-8 -->
+      <g data-step="4"><rect class="n replan" x="710" y="140" width="170" height="64" rx="12"/><text class="nt" x="795" y="178">Fall behind</text><text class="num" x="795" y="158">5</text></g>
+      <g data-step="5"><rect class="n replan" x="480" y="140" width="190" height="64" rx="12"/><text class="nt" x="575" y="178">Replan</text><text class="num" x="575" y="158">6</text></g>
+      <g data-step="6"><rect class="n replan" x="250" y="140" width="190" height="64" rx="12"/><text class="nt" x="345" y="178">Decide</text><text class="num" x="345" y="158">7</text></g>
+      <g data-step="7"><rect class="n" x="20" y="140" width="190" height="64" rx="12"/><text class="nt" x="115" y="178">Success</text><text class="num" x="115" y="158">8</text></g>
+      <path class="arrow" d="M210 62H248" marker-end="url(#ah)"/>
+      <path class="arrow" d="M440 62H478" marker-end="url(#ah)"/>
+      <path class="arrow" d="M670 62H708" marker-end="url(#ah)"/>
+      <path class="arrow" d="M795 94V138" marker-end="url(#ah)"/>
+      <path class="arrow" d="M710 172H672" marker-end="url(#ah)"/>
+      <path class="arrow" d="M480 172H442" marker-end="url(#ah)"/>
+      <path class="arrow" d="M250 172H212" marker-end="url(#ah)"/>
+      <path class="loopback" d="M345 204V232H795V206" />
+      <text class="lbl" x="570" y="226">Keeps cycling: work the plan → fall behind → replan</text>
+    </svg>
+    <div class="stepper">
+      <div class="step-nav">
+        <button class="btn" id="prev" type="button">← Back</button>
+        <button class="btn" id="next" type="button">Next →</button>
+        <span class="ref" id="stepcount" style="align-self:center"></span>
+      </div>
+      <div class="step-panel" data-panel="0"><h3>1 · Arrive (first time)</h3><p>The student opens StudyFlow AI and sees a welcoming screen explaining that the app builds a realistic plan from their exams, topics and available time.</p></div>
+      <div class="step-panel" data-panel="1"><h3>2 · Set up, step by step</h3><p>Subjects → exam date and topics per subject (name, estimated time, difficulty, confidence) → daily availability → <b>Generate My Study Plan</b>. Never one long form.</p></div>
+      <div class="step-panel" data-panel="2"><h3>3 · See the plan</h3><p>The dashboard shows today's sessions with status, plus a simple overview of upcoming exams.</p></div>
+      <div class="step-panel" data-panel="3"><h3>4 · Work the plan</h3><p>Each session is marked Completed, Skipped or Partially Completed, with optional actual time spent and an updated confidence.</p></div>
+      <div class="step-panel" data-panel="4"><h3>5 · Fall behind</h3><p>A scheduled day passes unmarked (shown as “Unconfirmed”), or sessions are skipped or only partly finished.</p></div>
+      <div class="step-panel" data-panel="5"><h3>6 · Replan</h3><p>Click <b>Replan My Schedule</b>. If any sessions are still Unconfirmed, a confirmation step comes first. After a loading state, only the <b>affected sessions</b> are shown, original → revised, with the AI's explanation.</p></div>
+      <div class="step-panel" data-panel="6"><h3>7 · Decide</h3><p>The student <b>accepts</b> the revised plan or <b>keeps the original</b>.</p></div>
+      <div class="step-panel" data-panel="7"><h3>8 · Success</h3><p>The revised plan visibly differs in priorities, time allocations and remaining workload, and the AI explains why. The plan responded to real progress.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SCREENS ============ -->
+<section id="screens">
+  <h2>Screens and layout</h2>
+  <p class="sub">Three surfaces. Rough sketches show what's on each; they are not final designs.</p>
+  <div class="card">
+    <div class="tabs" role="tablist" aria-label="Screens">
+      <button role="tab" aria-selected="true" data-tab="onboard">Onboarding</button>
+      <button role="tab" aria-selected="false" data-tab="dash">Dashboard</button>
+      <button role="tab" aria-selected="false" data-tab="review">Replan review</button>
+    </div>
+
+    <div class="tabpanel" data-tabpanel="onboard">
+      <div class="mock">
+        <h4>Step flow · one step at a time</h4>
+        <div class="row"><span><b>1 · Subjects</b><small>e.g., Database Systems, Software Engineering</small></span><span class="chip c-neutral">add several</span></div>
+        <div class="row"><span><b>2 · Exam date + topics</b><small>per topic: name · estimated time · difficulty 1–5 · confidence 1–5</small></span><span class="chip c-neutral">add several</span></div>
+        <div class="row"><span><b>3 · Availability</b><small>weekday hours · weekend hours · customize any day</small></span><span class="chip c-neutral">e.g., 2h / 5h Sat</span></div>
+        <span class="btn-mock">Generate My Study Plan</span>
+      </div>
+    </div>
+
+    <div class="tabpanel" data-tabpanel="dash" hidden>
+      <div class="mock">
+        <h4>Today's sessions</h4>
+        <div class="row"><span><b>Transaction Scheduling</b><small>Database Systems · 2h · High priority</small></span><span><span class="chip c-warn">Unconfirmed</span></span></div>
+        <div class="row"><span><b>Normalization</b><small>Database Systems · 1.5h · High priority</small></span><span class="chip c-ok">Completed</span></div>
+        <div class="row"><span><b>Requirements review</b><small>Software Engineering · 1h · Medium</small></span><span class="chip c-neutral">Planned</span></div>
+        <span class="btn-mock sec">Completed</span><span class="btn-mock sec">Skipped</span><span class="btn-mock sec">Partially</span><span class="ref"> + actual time spent</span>
+        <h4 style="margin-top:14px">Upcoming exams · Progress</h4>
+        <div class="row"><span><b>Database Systems</b><small>in 2 days</small></span><span class="chip c-neutral">3 of 6 sessions done</span></div>
+        <span class="btn-mock">Replan My Schedule</span><span class="btn-mock sec">Settings / Edit</span><span class="btn-mock sec">Start Over</span>
+      </div>
+      <ul class="plain ref"><li>Today's sessions are the main focus; a simple overview shows today until the last exam.</li><li>Settings / Edit: availability, subjects, exam dates, topics (add topic, change difficulty/confidence).</li><li>Start Over (Reset Demo) clears all data and returns to setup.</li><li>Progress is only completed vs. unfinished sessions. No analytics.</li></ul>
+    </div>
+
+    <div class="tabpanel" data-tabpanel="review" hidden>
+      <div class="mock">
+        <h4>Only the affected sessions · original → revised</h4>
+        <div class="row"><span><b>Transaction Scheduling</b><small>Day 1 (missed) → Day 2 · 2h</small></span><span class="chip c-ok">Prioritized</span></div>
+        <div class="row"><span><b>Normalization</b><small>Day 2 → Day 3 · 2h</small></span><span class="chip c-warn">Moved</span></div>
+        <h4 style="margin-top:12px">Not scheduled</h4>
+        <div class="row"><span><b>Database Architecture</b><small>Couldn't fit in the available time</small></span><span class="chip c-bad">Not scheduled</span></div>
+        <p class="ref" style="margin:10px 0 0">AI explanation: what moved, shortened or prioritized, and why. Unchanged sessions aren't repeated.</p>
+        <span class="btn-mock">Accept revised plan</span><span class="btn-mock sec">Keep original</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ LOOK ============ -->
+<section id="look">
+  <h2>Look and feel</h2>
+  <p class="sub">Calm, practical, trustworthy, not “futuristic AI”. <span class="ref">Carried forward to the spec; this page uses the same palette.</span></p>
+  <div class="grid">
+    <div class="card">
+      <b>Palette</b>
+      <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+        <span class="chip" style="background:#faf7f2;color:#14233f;border:1px solid #e8e2d6;padding:6px 12px">Warm off-white</span>
+        <span class="chip" style="background:#14233f;color:#fff;padding:6px 12px">Deep navy text</span>
+        <span class="chip" style="background:#1f8a78;color:#fff;padding:6px 12px">Teal/green · progress &amp; done</span>
+      </div>
+    </div>
+    <div class="card"><b>Type &amp; space</b><p style="margin:6px 0 0;color:var(--muted)">Readable, contemporary typography; clear headings; plenty of whitespace.</p></div>
+    <div class="card"><b>Inspiration</b><p style="margin:6px 0 0;color:var(--muted)">Linear's clarity and organization, with an approachable, supportive productivity-app feel.</p></div>
+    <div class="card"><b>Avoid</b><p style="margin:6px 0 0;color:var(--muted)">Excessive gradients, glowing effects, floating AI icons, unnecessary cards.</p></div>
+  </div>
+</section>
+
+<!-- ============ BEHAVIOR ============ -->
+<section id="behavior">
+  <h2>Behavior and acceptance criteria</h2>
+  <p class="sub">Each area has checkable criteria you can verify by looking at the screen during the build. Expand any area.</p>
+
+  <details>
+    <summary>Setup and availability <span class="ref">scope.md &gt; What “Working” Looks Like</span></summary>
+    <div class="dbody">
+      <p>The student enters subjects, then per subject an exam date and topics (name, estimated time, difficulty, confidence). Availability is per day of the week: weekday and weekend hours with optional overrides, editable later; the AI uses the updated limits on the next replan.</p>
+      <ul class="crit">
+        <li>Setup is a step-by-step flow, not one long form.</li>
+        <li>I can add several subjects, each with an exam date and several topics.</li>
+        <li>Each topic captures name, estimated time, difficulty (1–5) and confidence (1–5); values outside 1–5 can't be entered. <span class="ref">1 = easy / not confident, 5 = very hard / very confident</span></li>
+        <li>I can set weekday and weekend hours and override individual days.</li>
+        <li><b>Generate My Study Plan</b> produces a plan and opens the dashboard.</li>
+      </ul>
+    </div>
+  </details>
+
+  <details>
+    <summary>Editing after setup <span class="ref">new: your decision</span></summary>
+    <div class="dbody">
+      <p>From Settings / Edit the student can add a topic, change an exam date, or update difficulty and confidence, without restarting. The next replan uses those edits.</p>
+      <ul class="crit">
+        <li>I can add a topic, change an exam date, and update a topic's difficulty or confidence without restarting.</li>
+        <li>The edits I make are the ones the next replan uses.</li>
+      </ul>
+    </div>
+  </details>
+
+  <details>
+    <summary>Start Over (Reset Demo)</summary>
+    <div class="dbody">
+      <p>A simple option that clears all data and returns to the initial setup, useful for demonstrating the app several times during the hackathon.</p>
+      <ul class="crit">
+        <li>Start Over is reachable from the dashboard.</li>
+        <li>After confirming, all stored data is cleared and the welcome/setup flow appears as on first use.</li>
+      </ul>
+    </div>
+  </details>
+
+  <details>
+    <summary>Plan generation <span class="ref">scope.md &gt; The Core Loop</span></summary>
+    <div class="dbody">
+      <p>The system generates a daily plan from today until the last exam, using AI for prioritization and planning decisions while the application enforces hard constraints (daily hours, exam dates, topic time). Weak, high-stakes topics come first; days are never overloaded; room is left for breaks.</p>
+      <ul class="crit">
+        <li>Every session shows subject, topic, planned duration, priority and status.</li>
+        <li>No day's total planned time exceeds that day's available hours.</li>
+        <li>Lower-confidence, higher-difficulty topics near an exam get higher priority than strong topics.</li>
+      </ul>
+    </div>
+  </details>
+
+  <details>
+    <summary>Session tracking</summary>
+    <div class="dbody">
+      <p>Mark each session Completed, Skipped or Partially Completed; record actual time spent. Confidence can be updated when completing or partially completing, and the AI uses the latest level. For a partial session, the unfinished portion counts as remaining work at the next replan. Progress shows only as completed vs. unfinished sessions.</p>
+      <ul class="crit">
+        <li>Each session offers Completed / Skipped / Partially Completed.</li>
+        <li>I can enter actual time spent for a session.</li>
+        <li>When I mark a session Completed or Partially Completed, I can update my confidence in that topic.</li>
+        <li>If I mark a 2-hour session partially done with 1 hour spent, the next replan treats about 1 hour as remaining.</li>
+        <li>Status changes show immediately and remain after closing and reopening the app.</li>
+      </ul>
+    </div>
+  </details>
+
+  <details>
+    <summary>Unconfirmed sessions</summary>
+    <div class="dbody">
+      <p>A past, unmarked session is “Unconfirmed”, not auto-skipped, because the student may have done it offline. Clicking Replan with any open triggers an explicit confirmation step:</p>
+      <ol class="plain">
+        <li>A list of the Unconfirmed sessions appears <b>before</b> any AI request.</li>
+        <li>For each one, mark it Completed / Skipped / Partially Completed right there.</li>
+        <li>Choose <b>Replan with these updates</b>, <b>Replan anyway</b> (the rest are treated as missed), or <b>Cancel</b>.</li>
+        <li>“Replan anyway” treats them as missed for this replan only; their status stays “Unconfirmed”. <i>(Small assumption: confirm in review.)</i></li>
+        <li>No Unconfirmed sessions? This step is skipped.</li>
+      </ol>
+      <ul class="crit">
+        <li>A past, unmarked session displays “Unconfirmed”, not “Skipped”.</li>
+        <li>Replan with Unconfirmed sessions shows the confirmation step, listing them, before any AI request.</li>
+        <li>In that step I can mark any of them, then replan.</li>
+        <li>“Replan anyway” proceeds with the rest treated as missed; their status stays “Unconfirmed”.</li>
+        <li>“Cancel” returns me to the dashboard unchanged.</li>
+        <li>With none Unconfirmed, Replan starts immediately.</li>
+      </ul>
+    </div>
+  </details>
+
+  <details open>
+    <summary>Replan My Schedule <span class="tag-kernel">the kernel</span> <span class="ref">scope.md &gt; The Unique Kernel</span></summary>
+    <div class="dbody">
+      <p>The AI reassesses remaining tasks, exams, session outcomes, actual time, difficulty, confidence and current availability. It never blindly pushes everything to tomorrow: it prioritizes, postpones or shortens, and avoids unrealistic workloads.</p>
+      <p><b>Who decides what:</b> the <b>AI prioritizes and explains</b>; the <b>application validates the rules</b> before anything is shown: no day over its hours, nothing after its exam or in the past, no topic over its remaining time, every topic with work left either scheduled or listed as Not scheduled, and explanation numbers matching the plan. A proposal that breaks a rule is never shown; the student sees the failure message and can retry.</p>
+      <p class="quote">“I moved Database Architecture revision to Thursday because your Transaction Scheduling topic is less familiar and your exam is approaching.”</p>
+      <ul class="crit">
+        <li>After clicking, a loading state appears, then only the changed sessions display, each original → revised.</li>
+        <li>Unchanged sessions are not duplicated in the review view.</li>
+        <li>A proposal that breaks an enforced rule is never shown; I see the failure message with Retry.</li>
+        <li>Each moved, shortened or prioritized session is explained in plain language.</li>
+        <li><b>Accept</b> replaces the active plan; <b>Keep original</b> leaves it unchanged.</li>
+        <li>The revised plan visibly differs in priorities, time allocations or remaining workload (demo: original → missed session → revised).</li>
+      </ul>
+    </div>
+  </details>
+
+  <details>
+    <summary>Not enough time: honest trade-offs <span class="tag-kernel">the kernel</span></summary>
+    <div class="dbody">
+      <p>If everything can't fit before an exam, the AI prioritizes by exam proximity, difficulty and confidence, respects hours and breaks, and lists what couldn't fit as <b>Not scheduled</b> with the reason.</p>
+      <p class="quote">“Your exam is in two days, and you have four study hours available, but your remaining topics require six hours… Database Architecture revision couldn't fit and is listed below as ‘Not scheduled.’”</p>
+      <ul class="crit">
+        <li>When required time exceeds available time, the explanation states both numbers.</li>
+        <li>Topics that couldn't fit appear in “Not scheduled” with a reason each.</li>
+        <li>Scheduled sessions never exceed the available hours.</li>
+      </ul>
+    </div>
+  </details>
+</section>
+
+<!-- ============ STATES ============ -->
+<section id="states">
+  <h2>States and what-ifs</h2>
+  <p class="sub">The edge cases you resolved, and exactly what the student sees.</p>
+  <div class="grid">
+    <div class="state"><b>First use</b><p>No plan yet, so the student sees onboarding, not an empty dashboard.</p></div>
+    <div class="state warn"><b>Unconfirmed session</b><p>Past and unmarked: shown as “Unconfirmed” until the student resolves it. Replan asks to confirm or proceed.</p></div>
+    <div class="state warn"><b>Replan confirmation</b><p>If Unconfirmed sessions exist, a confirmation step comes first: mark them, replan anyway, or cancel.</p></div>
+    <div class="state"><b>Replan loading</b><p>A visible loading state while the revised plan is generated.</p></div>
+    <div class="state good"><b>Replan not needed</b><p>“You're on track! Your current plan still fits your deadlines and availability.” No changes are made just to look useful.</p></div>
+    <div class="state bad"><b>Replan failed, too slow, or the proposal broke a rule</b><p>Original plan unchanged. “We couldn't generate your revised plan. Your current schedule is safe—please try again.” <b style="display:inline">Retry</b> available; no progress lost.</p></div>
+    <div class="state warn"><b>Insufficient time</b><p>Revised plan includes a “Not scheduled” list with a reason per topic.</p></div>
+    <div class="state"><b>After Start Over</b><p>All data cleared; the student sees the first-use welcome and setup again.</p></div>
+    <div class="state"><b>What persists</b><p>Plan, statuses, time spent, confidence, availability and edited subjects/exams/topics stay between visits. <i>How</i> is a <code>4-spec</code> decision.</p></div>
+    <div class="state"><b>Boundaries</b><p>One student, no accounts, nothing shared.</p></div>
+  </div>
+</section>
+
+<!-- ============ DEMO ============ -->
+<section id="demo">
+  <h2>The canonical demo scenario</h2>
+  <p class="sub">The one scenario the app must reproduce end to end, used for the demo video and for checking the build. Built from your own examples; the day layout is my arrangement of your numbers, so confirm it.</p>
+  <div class="grid">
+    <div class="card">
+      <b>1 · Setup</b>
+      <p style="margin:6px 0 0;color:var(--muted)">Database Systems, exam on <b>Day 4</b>. Availability: 2h per day on Days 1–3.</p>
+      <div class="mock" style="margin-top:10px">
+        <div class="row"><span><b>Transaction Scheduling</b><small>2h</small></span><span class="chip c-bad">diff 5 · conf 1</span></div>
+        <div class="row"><span><b>Normalization</b><small>2h</small></span><span class="chip c-warn">diff 4 · conf 2</span></div>
+        <div class="row"><span><b>Database Architecture</b><small>2h</small></span><span class="chip c-ok">diff 2 · conf 4</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <b>2 · Original plan <span class="ref">6h, fits exactly</span></b>
+      <div class="mock" style="margin-top:10px">
+        <div class="row"><span><b>Day 1</b><small>Transaction Scheduling · 2h</small></span><span class="chip c-warn">Unconfirmed</span></div>
+        <div class="row"><span><b>Day 2</b><small>Normalization · 2h</small></span><span class="chip c-neutral">Planned</span></div>
+        <div class="row"><span><b>Day 3</b><small>Database Architecture · 2h</small></span><span class="chip c-neutral">Planned</span></div>
+      </div>
+      <p class="ref" style="margin:8px 0 0">Day 1 goes unmarked. Now 4h available, 6h still needed.</p>
+    </div>
+    <div class="card">
+      <b>3 · Replan</b>
+      <ol class="plain">
+        <li>Click <b>Replan My Schedule</b>; confirm “Replan anyway”.</li>
+        <li>Only the affected sessions show, original → revised.</li>
+        <li>AI explains: 6h needed, 4h available; weakest topics first.</li>
+        <li><b>Accept revised plan.</b></li>
+      </ol>
+    </div>
+    <div class="card">
+      <b>4 · Result</b>
+      <div class="mock" style="margin-top:10px">
+        <div class="row"><span><b>Transaction Scheduling</b><small>Day 1 (missed) → Day 2 · 2h</small></span><span class="chip c-ok">Prioritized</span></div>
+        <div class="row"><span><b>Normalization</b><small>Day 2 → Day 3 · 2h</small></span><span class="chip c-warn">Moved</span></div>
+        <div class="row"><span><b>Database Architecture</b><small>strongest topic · conf 4</small></span><span class="chip c-bad">Not scheduled</span></div>
+      </div>
+    </div>
+  </div>
+  <p class="ref" style="margin-top:10px"><b>What it proves:</b> the plan changed because of what the student actually did; the AI put the weakest topics first, was honest about the shortfall, and never exceeded the available hours.</p>
+  <div class="card" style="margin-top:12px;border-left:4px solid var(--teal)"><b>Acceptance test</b><p style="margin:4px 0 0;color:var(--muted)">The canonical demo scenario is the primary acceptance test. If the complete demo scenario works reliably, the POC is considered functionally successful even if non-critical edge cases or secondary UI polish remain.</p></div>
+</section>
+
+<!-- ============ BOUNDARY ============ -->
+<section id="boundary">
+  <h2>What we're building vs. deferred</h2>
+  <div class="cols">
+    <div class="card">
+      <span class="pill c-ok">Building</span>
+      <ul class="plain">
+        <li>Welcome + step-by-step setup with per-day availability</li>
+        <li>AI daily plan within daily hours</li>
+        <li>Dashboard: today's sessions, statuses, exam overview, completed vs. unfinished</li>
+        <li>Session tracking incl. actual time, confidence, partial-session remainder, Unconfirmed</li>
+        <li>Settings / Edit for subjects, exams, topics and availability</li>
+        <li>Start Over (Reset Demo)</li>
+        <li>Replan: Unconfirmed confirmation step, loading, affected sessions only (original → revised), explanations, Accept / Keep original, Not scheduled, on-track message, failure + Retry, rule checks on the AI's proposal</li>
+        <li>One canonical demo scenario</li>
+        <li>Plan and progress persist between visits</li>
+      </ul>
+    </div>
+    <div class="card">
+      <span class="pill c-warn">Deferred</span>
+      <ul class="plain">
+        <li><b>Manual editing of the generated plan's sessions:</b> adds edit flows and conflicts with AI replans (editing your subjects/topics <i>is</i> in)</li>
+        <li><b>Undo of an accepted replan:</b> “Keep original” covers it for now</li>
+        <li><b>Attention panel and analytics:</b> completed/unfinished is enough to prove adaptation</li>
+        <li><b>Accounts and sync:</b> cut in scope</li>
+      </ul>
+      <p class="ref" style="margin:10px 0 0">Later: assignments, personal goals, analytics, notifications, collaboration. Non-goals: silently assuming a skip, fake changes, cramming an unrealistic schedule.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ OPEN ============ -->
+<section id="open">
+  <h2>Open questions</h2>
+  <p class="sub">Nothing remaining blocks <code>4-spec</code>. Your answers resolved the earlier five (editing after setup, Start Over, Partially Completed, where confidence updates, daily view vs. overview).</p>
+</section>
+
+<section id="review">
+  <div class="card next">
+    <h2>Your review</h2>
+    <p style="margin:6px 0 0">Read through, then tell me in the chat: <b>“looks good”</b> to approve, or what to change. <code>devpost/prd.md</code> is the canonical version; this page is regenerated after any change.</p>
+  </div>
+</section>
+
+<footer>StudyFlow AI · PRD companion · works offline; scripts only power the stepper and tabs</footer>
+</div>
+
+<script>
+(function () {
+  document.documentElement.classList.add('js');
+
+  // Journey stepper
+  var panels = document.querySelectorAll('.step-panel');
+  var nodes = document.querySelectorAll('svg g[data-step]');
+  var count = document.getElementById('stepcount');
+  var cur = 0;
+  function go(i) {
+    cur = Math.max(0, Math.min(panels.length - 1, i));
+    panels.forEach(function (p, k) { p.hidden = k !== cur; });
+    nodes.forEach(function (g) {
+      var on = Number(g.dataset.step) === cur;
+      g.querySelector('rect').classList.toggle('active', on);
+      g.querySelector('.nt').classList.toggle('on', on);
+    });
+    count.textContent = 'Step ' + (cur + 1) + ' of ' + panels.length;
+  }
+  document.getElementById('prev').addEventListener('click', function () { go(cur - 1); });
+  document.getElementById('next').addEventListener('click', function () { go(cur + 1); });
+  nodes.forEach(function (g) { g.addEventListener('click', function () { go(Number(g.dataset.step)); }); });
+  go(0);
+
+  // Screen tabs
+  var tabs = document.querySelectorAll('.tabs [role="tab"]');
+  var tpanels = document.querySelectorAll('.tabpanel');
+  tabs.forEach(function (t) {
+    t.addEventListener('click', function () {
+      tabs.forEach(function (x) { x.setAttribute('aria-selected', String(x === t)); });
+      tpanels.forEach(function (p) { p.hidden = p.dataset.tabpanel !== t.dataset.tab; });
+    });
+  });
+})();
+</script>
+</body>
+</html>

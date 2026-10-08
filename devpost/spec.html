@@ -1,0 +1,439 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>StudyFlow AI — Spec</title>
+<style>
+  :root {
+    --bg: #faf7f2; --surface: #fffdf9; --ink: #14233f; --muted: #5d6881; --line: #e8e2d6;
+    --teal: #1f8a78; --teal-soft: #e0f1ed; --amber: #b7791f; --amber-soft: #fbf0dc;
+    --red: #b83a4b; --red-soft: #f9e5e8; --navy-soft: #e9edf5; --code: #f1ede4;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #0f1a2e; --surface: #16233b; --ink: #eef1f7; --muted: #a3afc7; --line: #26355a;
+      --teal: #4fd1b8; --teal-soft: #123a38; --amber: #f0b44d; --amber-soft: #3a2e14;
+      --red: #ff7d90; --red-soft: #3c1b25; --navy-soft: #1c2c4b; --code: #1a2a47; }
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.6 "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  .wrap { max-width: 1000px; margin: 0 auto; padding: 0 16px 80px; }
+  code { background: var(--code); padding: 1px 6px; border-radius: 6px; font-size: .88em; font-family: ui-monospace, Consolas, monospace; }
+  pre { background: var(--code); padding: 14px; border-radius: 10px; overflow-x: auto; font-size: 13px; line-height: 1.5; margin: 10px 0 0; }
+  pre code { background: none; padding: 0; }
+  a { color: var(--teal); }
+
+  header { padding: 48px 0 20px; }
+  .badge { display: inline-block; font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; background: var(--amber-soft); color: var(--amber); padding: 4px 10px; border-radius: 999px; }
+  h1 { font-size: clamp(2rem, 5vw, 2.8rem); letter-spacing: -.02em; line-height: 1.1; margin: 14px 0 8px; }
+  .tagline { color: var(--muted); font-size: 1.1rem; max-width: 680px; margin: 0; }
+  nav { position: sticky; top: 0; z-index: 5; background: color-mix(in srgb, var(--bg) 90%, transparent); backdrop-filter: blur(8px); border-bottom: 1px solid var(--line); margin: 0 -16px 28px; padding: 10px 16px; }
+  nav ul { list-style: none; display: flex; gap: 4px; margin: 0; padding: 0; overflow-x: auto; }
+  nav a { display: block; white-space: nowrap; text-decoration: none; color: var(--muted); font-size: 14px; font-weight: 500; padding: 6px 12px; border-radius: 999px; }
+  nav a:hover, nav a:focus-visible { background: var(--teal-soft); color: var(--teal); outline: none; }
+
+  section { margin: 0 0 44px; scroll-margin-top: 70px; }
+  h2 { font-size: 1.4rem; letter-spacing: -.01em; margin: 0 0 4px; }
+  .sub { color: var(--muted); margin: 0 0 16px; }
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 20px; }
+  .grid { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+  .ref { font-size: 12px; color: var(--muted); }
+  .key { border-left: 4px solid var(--amber); }
+
+  svg { width: 100%; height: auto; display: block; }
+  svg text { font-family: inherit; }
+  .box { fill: var(--surface); stroke: var(--line); stroke-width: 1.5; }
+  .box.fe { stroke: var(--teal); }
+  .box.be { stroke: var(--ink); }
+  .box.db { stroke: #6b7cff; }
+  .box.ai { stroke: var(--amber); }
+  .bt { fill: var(--ink); font-size: 14px; font-weight: 700; text-anchor: middle; }
+  .bs { fill: var(--muted); font-size: 11.5px; text-anchor: middle; }
+  .ar { stroke: var(--muted); stroke-width: 1.8; fill: none; }
+  .al { fill: var(--muted); font-size: 11px; text-anchor: middle; }
+  .zone { fill: none; stroke: var(--line); stroke-dasharray: 5 4; stroke-width: 1.5; }
+  .zl { fill: var(--muted); font-size: 11px; font-weight: 700; letter-spacing: .08em; }
+  .hl { stroke: var(--teal) !important; stroke-width: 3 !important; }
+  .hl-fill { fill: var(--teal-soft) !important; }
+
+  .step-nav { display: flex; gap: 8px; margin: 14px 0 10px; flex-wrap: wrap; align-items: center; }
+  button.btn { font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; padding: 8px 14px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); }
+  button.btn:hover { border-color: var(--teal); }
+  button.btn:focus-visible { outline: 3px solid var(--teal-soft); outline-offset: 2px; }
+  .step-panel { padding: 14px 16px; border-radius: 12px; background: var(--navy-soft); }
+  .step-panel h3 { margin: 0 0 4px; font-size: 1.02rem; }
+  .step-panel p { margin: 0; color: var(--muted); }
+  .js .step-panel[hidden] { display: none; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 14.5px; }
+  th, td { text-align: left; padding: 9px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: .05em; }
+  .tbl { overflow-x: auto; }
+
+  details { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; margin: 0 0 10px; overflow: hidden; }
+  summary { cursor: pointer; list-style: none; padding: 13px 16px; font-weight: 600; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  summary::-webkit-details-marker { display: none; }
+  summary::after { content: "+"; margin-left: auto; font-size: 22px; color: var(--muted); line-height: 1; }
+  details[open] > summary::after { content: "–"; }
+  summary:focus-visible { outline: 3px solid var(--teal-soft); outline-offset: -3px; }
+  .dbody { padding: 0 16px 16px; border-top: 1px solid var(--line); }
+  .dbody p { margin: 12px 0 0; }
+  .grp { font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin: 18px 0 8px; }
+  .chip { font-size: 11px; font-weight: 700; padding: 2px 9px; border-radius: 999px; white-space: nowrap; }
+  .c-fe { background: var(--teal-soft); color: var(--teal); }
+  .c-be { background: var(--navy-soft); color: var(--ink); }
+  .c-warn { background: var(--amber-soft); color: var(--amber); }
+  ol.rules { margin: 10px 0 0; padding-left: 22px; }
+  ol.rules li { margin: 4px 0; }
+  ul.plain { margin: 8px 0 0; padding-left: 20px; }
+  .flag { background: var(--amber-soft); border: 1px solid var(--amber); border-radius: 12px; padding: 14px 16px; margin: 0 0 10px; }
+  .flag b { color: var(--amber); }
+  .tree { font-family: ui-monospace, Consolas, monospace; font-size: 13px; line-height: 1.55; white-space: pre; overflow-x: auto; }
+  .next { border-color: var(--teal); background: var(--teal-soft); }
+  footer { color: var(--muted); font-size: 13px; text-align: center; margin-top: 48px; }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <span class="badge" style="background:var(--teal-soft);color:var(--teal)">Spec · Approved</span>
+  <h1>StudyFlow AI — Technical Spec</h1>
+  <p class="tagline">How the PRD gets built: three pieces and one outside AI, with the rule that <b>the AI proposes and the backend checks</b>.</p>
+</header>
+
+<nav aria-label="Sections">
+  <ul>
+    <li><a href="#plain">Plain language</a></li>
+    <li><a href="#arch">Architecture</a></li>
+    <li><a href="#journey">Journey</a></li>
+    <li><a href="#ai">AI contract</a></li>
+    <li><a href="#stack">Stack</a></li>
+    <li><a href="#components">Components</a></li>
+    <li><a href="#data">Data</a></li>
+    <li><a href="#files">Files</a></li>
+    <li><a href="#fail">Failure modes</a></li>
+    <li><a href="#decide">Decisions</a></li>
+  </ul>
+</nav>
+
+<section id="plain">
+  <h2>How this works, in plain language</h2>
+  <p class="sub">Say this back to someone and your app is understood.</p>
+  <div class="grid">
+    <div class="card"><b>The website <span class="chip c-fe">Next.js / React</span></b><p style="margin:6px 0 0;color:var(--muted)">What the student sees and clicks. It never touches the database or the AI. It only asks the backend.</p></div>
+    <div class="card"><b>The backend <span class="chip c-be">Node + Express</span></b><p style="margin:6px 0 0;color:var(--muted)">The brain room. Reads and writes the database, and is the <b>only</b> place that talks to the AI. Your API key lives here.</p></div>
+    <div class="card"><b>The database <span class="chip c-be">MongoDB Atlas</span></b><p style="margin:6px 0 0;color:var(--muted)">One saved plan for the whole app (no accounts): subjects, topics, availability, sessions, progress.</p></div>
+    <div class="card"><b>The AI <span class="chip c-warn">Gemini free tier</span></b><p style="margin:6px 0 0;color:var(--muted)">Makes the judgment calls: what first, what to shorten, what to leave out, and why. Answers in structured JSON.</p></div>
+  </div>
+  <div class="card key" style="margin-top:14px"><b>The most important idea:</b> the AI is good at judgment and explanation but can be wrong, so <b>every AI answer goes through a validator</b> that enforces the hard rules. A proposal that breaks a rule is never shown to the student. This is the heart of the “integrating AI” lesson.</div>
+</section>
+
+<section id="arch">
+  <h2>Architecture</h2>
+  <p class="sub">Click a step in the journey below to light up the path it takes through this diagram.</p>
+  <div class="card">
+    <svg viewBox="0 0 900 360" role="img" aria-labelledby="at ad">
+      <title id="at">Architecture diagram</title>
+      <desc id="ad">The browser runs the Next.js website. It calls the Express backend. The backend reads and writes MongoDB Atlas and calls the Gemini API, with a validator between the AI answer and the database.</desc>
+      <defs><marker id="m" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="var(--muted)"/></marker></defs>
+      <rect class="zone" x="10" y="20" width="230" height="320" rx="14"/><text class="zl" x="26" y="42">YOUR BROWSER · localhost:3000</text>
+      <rect class="zone" x="280" y="20" width="340" height="320" rx="14"/><text class="zl" x="296" y="42">YOUR COMPUTER · localhost:4000</text>
+      <rect class="zone" x="660" y="20" width="230" height="320" rx="14"/><text class="zl" x="676" y="42">OUTSIDE SERVICES</text>
+
+      <g id="n-web"><rect class="box fe" x="30" y="130" width="190" height="110" rx="12"/>
+        <text class="bt" x="125" y="165">Next.js website</text>
+        <text class="bs" x="125" y="187">Onboarding · Dashboard</text>
+        <text class="bs" x="125" y="203">Replan review · Settings</text>
+        <text class="bs" x="125" y="219">lib/api.js</text></g>
+
+      <g id="n-routes"><rect class="box be" x="300" y="60" width="300" height="60" rx="12"/>
+        <text class="bt" x="450" y="88">Express routes</text><text class="bs" x="450" y="106">thin: read request → call a service → reply</text></g>
+      <g id="n-replan"><rect class="box be" x="300" y="140" width="140" height="70" rx="12"/>
+        <text class="bt" x="370" y="168">Replan workflow</text><text class="bs" x="370" y="186">+ scheduling helpers</text><text class="bs" x="370" y="200">(pure functions)</text></g>
+      <g id="n-ai"><rect class="box be" x="460" y="140" width="140" height="70" rx="12"/>
+        <text class="bt" x="530" y="168">AI planner</text><text class="bs" x="530" y="186">prompt + JSON schema</text><text class="bs" x="530" y="200">one module</text></g>
+      <g id="n-val"><rect class="box be" x="380" y="235" width="160" height="60" rx="12"/>
+        <text class="bt" x="460" y="262">Validator</text><text class="bs" x="460" y="280">hard rules, unit-tested</text></g>
+      <g id="n-store"><rect class="box be" x="300" y="305" width="140" height="28" rx="8"/><text class="bs" x="370" y="324">PlanStore (Mongoose)</text></g>
+
+      <g id="n-db"><rect class="box db" x="680" y="70" width="190" height="90" rx="12"/>
+        <text class="bt" x="775" y="105">MongoDB Atlas</text><text class="bs" x="775" y="125">one StudyPlan document</text><text class="bs" x="775" y="141">free M0 cluster</text></g>
+      <g id="n-gem"><rect class="box ai" x="680" y="200" width="190" height="90" rx="12"/>
+        <text class="bt" x="775" y="235">Gemini API</text><text class="bs" x="775" y="255">free tier · returns JSON</text><text class="bs" x="775" y="271">key stays on the backend</text></g>
+
+      <path class="ar" d="M220 160H298" marker-end="url(#m)"/><text class="al" x="259" y="150">HTTP</text>
+      <path class="ar" d="M450 120V138" marker-end="url(#m)"/>
+      <path class="ar" d="M440 175H458" marker-end="url(#m)"/>
+      <path class="ar" d="M530 210L500 233" marker-end="url(#m)"/>
+      <path class="ar" d="M420 235L390 212" marker-end="url(#m)"/>
+      <path class="ar" d="M370 210V303" marker-end="url(#m)"/>
+      <path class="ar" d="M440 319H600Q640 319 640 115H678" marker-end="url(#m)"/>
+      <path class="ar" d="M600 175H640V245H678" marker-end="url(#m)"/>
+      <text class="al" x="650" y="212" transform="rotate(-90 650 212)">JSON</text>
+    </svg>
+    <p class="ref" style="margin:8px 0 0">The AI never writes to the database. Its answer passes through the validator first; only a valid, accepted proposal is saved.</p>
+  </div>
+</section>
+
+<section id="journey">
+  <h2>The core journey through the system</h2>
+  <p class="sub">The POC critical path: <b>Setup → Generate → Miss/Partial → Replan → Review → Accept</b>. <span class="ref">PRD ref: The Core Journey, Canonical Demo Scenario</span></p>
+  <div class="card">
+    <div class="step-nav">
+      <button class="btn" id="prev" type="button">← Back</button>
+      <button class="btn" id="next" type="button">Next →</button>
+      <span class="ref" id="stepcount"></span>
+    </div>
+    <div class="step-panel" data-panel="0" data-hl="n-web"><h3>1 · Setup</h3><p>The student fills the onboarding steps. <b>Generate My Study Plan</b> sends subjects, topics and availability to the backend, which saves them in the database.</p></div>
+    <div class="step-panel" data-panel="1" data-hl="n-ai,n-val,n-gem"><h3>2 · Generate</h3><p>The backend works out minutes available per day until each exam and asks Gemini to place topics, weakest and most urgent first. Gemini answers in JSON; the <b>validator</b> checks it; if valid, the sessions are saved and the dashboard appears.</p></div>
+    <div class="step-panel" data-panel="2" data-hl="n-routes,n-db"><h3>3 · Work the plan</h3><p>Completed / Skipped / Partially Completed, minutes and confidence go to the backend as small updates and are saved.</p></div>
+    <div class="step-panel" data-panel="3" data-hl="n-web"><h3>4 · Fall behind</h3><p>A day passes. The website shows any past, still-planned session as <b>Unconfirmed</b>. It is worked out from the date each time, never stored.</p></div>
+    <div class="step-panel" data-panel="4" data-hl="n-web,n-replan"><h3>5 · Replan</h3><p>If Unconfirmed sessions exist, the website shows the confirmation step <i>first</i>. Then the backend computes remaining work per topic and minutes per remaining day, asks Gemini, validates (one automatic repair attempt), and diffs old against new to get the <b>affected sessions</b>. The proposal is saved as “pending”.</p></div>
+    <div class="step-panel" data-panel="5" data-hl="n-web,n-routes"><h3>6 · Review</h3><p>The website shows only the affected sessions (original → revised), the Not scheduled list with reasons, the explanation, and the numbers (needed vs. available), which the <b>backend</b> calculated, not the AI.</p></div>
+    <div class="step-panel" data-panel="6" data-hl="n-routes,n-store,n-db"><h3>7 · Accept / Keep original</h3><p>Accept swaps the pending sessions into the active plan (history is kept). Keep original discards the proposal. The database is updated and the dashboard refreshes.</p></div>
+  </div>
+</section>
+
+<section id="ai">
+  <h2>The AI contract</h2>
+  <p class="sub">The part you want to understand. <span class="ref">PRD ref: Replan My Schedule › Who decides what</span></p>
+  <div class="grid">
+    <div class="card">
+      <b>1 · What the backend sends</b>
+      <ul class="plain">
+        <li>The app date (today)</li>
+        <li>Each topic: id, name, subject, exam date, difficulty, confidence, <b>remaining minutes</b></li>
+        <li>Each remaining date with its <b>available minutes</b> (the backend does the calendar maths)</li>
+        <li>What happened: missed, partial, unconfirmed-treated-as-missed</li>
+        <li>The current future sessions</li>
+      </ul>
+    </div>
+    <div class="card">
+      <b>2 · What the AI must return</b>
+<pre><code>{
+  "sessions":     [{topicId, date, minutes, priority}],
+  "notScheduled": [{topicId, minutes, reason}],
+  "changes":      [{topicId, kind, reason}],
+  "summary":      {neededMinutes, availableMinutes},
+  "explanation":  "plain-language paragraph"
+}</code></pre>
+    </div>
+  </div>
+  <div class="card" style="margin-top:14px">
+    <b>3 · The seven rules the validator enforces</b> <span class="ref">server/src/services/validator.js · unit-tested</span>
+    <ol class="rules">
+      <li>The JSON has the expected shape (Zod).</li>
+      <li>No day's scheduled minutes exceed that day's available minutes.</li>
+      <li>No session is after its subject's exam date, or before today.</li>
+      <li>No topic is scheduled for more minutes than its remaining work.</li>
+      <li>Every topic with remaining work is scheduled (fully or shortened) <i>or</i> listed in <code>notScheduled</code> with a reason.</li>
+      <li>The AI's echoed <code>neededMinutes</code> / <code>availableMinutes</code> equal the backend's own numbers.</li>
+      <li>Every <code>topicId</code> refers to a real topic.</li>
+    </ol>
+    <p class="ref" style="margin:10px 0 0">If any rule fails: one automatic <b>repair attempt</b> (the broken rules are appended to the prompt). Second failure → the PRD's “We couldn't generate your revised plan…” message with Retry. The bad proposal is never shown or saved.</p>
+  </div>
+</section>
+
+<section id="stack">
+  <h2>Stack and how to run it</h2>
+  <p class="sub">Items marked <span class="chip c-warn">verify</span> are from memory and get checked first in the build.</p>
+  <div class="card tbl">
+    <table>
+      <thead><tr><th>Piece</th><th>Choice</th><th>Tradeoff / note</th></tr></thead>
+      <tbody>
+        <tr><td>Frontend</td><td><b>Next.js</b> (App Router, plain JS), used as a React app that calls Express</td><td>Your choice. Two servers to run. Next.js API routes are <i>not</i> used. <a href="https://nextjs.org/docs">docs</a> <span class="chip c-warn">verify version</span></td></tr>
+        <tr><td>Backend</td><td><b>Node.js + Express</b></td><td>Your choice. <a href="https://expressjs.com">docs</a></td></tr>
+        <tr><td>Database</td><td><b>MongoDB Atlas</b> free M0 + <b>Mongoose</b></td><td>Your choice. <a href="https://www.mongodb.com/docs/atlas/">Atlas</a> · <a href="https://mongoosejs.com/docs/">Mongoose</a></td></tr>
+        <tr><td>AI</td><td><b>Gemini API</b>, targeting a currently available free-tier model, via <code>@google/genai</code></td><td>Free-tier availability, models and rate limits can change; the provider is isolated in one module so it can be swapped. <a href="https://ai.google.dev/gemini-api/docs">docs</a> · <a href="https://ai.google.dev/gemini-api/docs/structured-output">structured output</a> <span class="chip c-warn">verify model + call shape</span></td></tr>
+        <tr><td>Validation</td><td><b>Zod</b> + plain rule functions</td><td><a href="https://zod.dev">docs</a></td></tr>
+        <tr><td>Tests</td><td><code>node --test</code></td><td>No framework to install</td></tr>
+        <tr><td>Language / styling</td><td>Plain <b>JavaScript</b>, plain <b>CSS</b> variables</td><td>My default, needs your OK (see Decisions)</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="card" style="margin-top:14px">
+    <b>Run it locally</b>
+    <pre><code>npm install                       # root: installs both apps
+cp server/.env.example server/.env   # add MONGODB_URI, GEMINI_API_KEY
+npm run dev                       # Express :4000 + Next.js :3000
+# open http://localhost:3000</code></pre>
+    <p class="ref" style="margin:8px 0 0">Keys go only in <code>server/.env</code> (git-ignored), never in chat or the repo. Deployment is optional and decided in <code>6-ship</code>; the submission needs a short demo video, a public repo and an open-source license either way.</p>
+  </div>
+</section>
+
+<section id="components">
+  <h2>Components</h2>
+  <p class="sub">Each one maps to a PRD heading. Expand to see what it does.</p>
+
+  <div class="grp">Frontend · client/</div>
+  <details><summary>App shell <span class="chip c-fe">page.js</span></summary><div class="dbody"><p>Loads the plan from the backend; shows Onboarding if none, else the Dashboard. The database is the source of truth; the page holds the plan in memory only.</p><p class="ref">PRD: States and Boundaries (first use, after Start Over, what persists)</p></div></details>
+  <details><summary>OnboardingFlow</summary><div class="dbody"><p>Welcome → subjects → exam date + topics (name, estimated time, difficulty 1–5, confidence 1–5) → availability (weekday/weekend defaults, per-day overrides) → Generate. Validates 1–5 before sending.</p><p class="ref">PRD: Setup and availability, Screens and Layout</p></div></details>
+  <details><summary>Dashboard + SessionCard</summary><div class="dbody"><p>Today's sessions as the focus, a simple overview to the last exam, exam list, completed vs. unfinished, Replan button, Settings and Start Over links, Not scheduled list. SessionCard offers Completed / Skipped / Partially Completed, minutes, and a confidence update; shows <b>Unconfirmed</b> for past planned sessions.</p><p class="ref">PRD: Screens and Layout, Plan generation, Session tracking, Unconfirmed sessions</p></div></details>
+  <details><summary>SettingsPanel</summary><div class="dbody"><p>Edit availability, subjects, exam dates, topics. Saving flags “edited since last plan” so the next replan runs.</p><p class="ref">PRD: Setup and availability (editing after setup)</p></div></details>
+  <details><summary>ReplanConfirmDialog</summary><div class="dbody"><p>Shown only if Unconfirmed sessions exist: mark them, <b>Replan with these updates</b>, <b>Replan anyway</b>, or <b>Cancel</b>. Runs before any AI request.</p><p class="ref">PRD: Unconfirmed sessions</p></div></details>
+  <details open><summary>ReplanReview <span class="chip c-warn">the kernel</span></summary><div class="dbody"><p>Loading state, then affected sessions (original → revised), Not scheduled with reasons, backend-calculated numbers, the AI explanation, <b>Accept</b> / <b>Keep original</b>. Also the on-track message and the failure message with Retry.</p><p class="ref">PRD: Replan My Schedule, Not enough time, States and Boundaries</p></div></details>
+  <details><summary>DemoClockControl <span class="chip c-warn">new, needs your OK</span></summary><div class="dbody"><p>A labeled <b>Demo clock</b> showing the app date with an <b>Advance one day</b> button, so “miss Day 1, replan on Day 2” can be recorded in one sitting. The backend uses the app date wherever it would use today.</p><p class="ref">PRD: Canonical Demo Scenario (not itself in the PRD)</p></div></details>
+  <details><summary>StartOver + API client</summary><div class="dbody"><p>StartOver confirms, deletes the plan, resets the demo clock, returns to onboarding. <code>lib/api.js</code> wraps every call and turns errors into the PRD's friendly messages.</p><p class="ref">PRD: Start Over (Reset Demo)</p></div></details>
+
+  <div class="grp">Backend · server/</div>
+  <details><summary>Routes + PlanStore <span class="chip c-be">routes/plan.js · models/StudyPlan.js</span></summary><div class="dbody"><p>Routes are thin: read request → call a service → reply. PlanStore is the Mongoose model plus load/save/clear helpers for the single plan document.</p>
+    <div class="tbl"><table><thead><tr><th>Endpoint</th><th>Purpose</th></tr></thead><tbody>
+      <tr><td><code>GET /plan</code></td><td>Plan (or null), app date, derived Unconfirmed list</td></tr>
+      <tr><td><code>PUT /setup</code></td><td>Save subjects, topics, availability</td></tr>
+      <tr><td><code>POST /plan/generate</code></td><td>First plan via AI + validator</td></tr>
+      <tr><td><code>PATCH /sessions/:id</code></td><td>Status, minutes, confidence</td></tr>
+      <tr><td><code>PATCH /settings</code></td><td>Edit availability / subjects / topics</td></tr>
+      <tr><td><code>POST /replan</code></td><td><code>{treatUnconfirmedAsMissed}</code> → on_track | proposal | error</td></tr>
+      <tr><td><code>POST /replan/accept</code> · <code>/discard</code></td><td>Make pending active · Keep original</td></tr>
+      <tr><td><code>DELETE /plan</code></td><td>Start Over</td></tr>
+      <tr><td><code>POST /demo/advance-day</code></td><td>Demo clock +1 day</td></tr>
+    </tbody></table></div></div></details>
+  <details><summary>Scheduling helpers <span class="chip c-be">pure</span></summary><div class="dbody"><p>No database, no AI. App date; minutes available per date (from per-weekday availability up to each exam); remaining minutes per topic; which sessions are Unconfirmed; the needed-vs-available numbers.</p><p class="ref">PRD: Plan generation, Session tracking, Not enough time</p></div></details>
+  <details open><summary>AI planner <span class="chip c-warn">services/aiPlanner.js</span></summary><div class="dbody"><p>Builds the prompt and JSON schema, calls Gemini once, parses the result. One function, two modes (<code>generate</code> and <code>replan</code>), so the first plan and every replan share one code path. It never decides if a proposal is acceptable.</p><p class="ref">PRD: Plan generation, Replan My Schedule</p></div></details>
+  <details open><summary>Validator <span class="chip c-warn">services/validator.js</span></summary><div class="dbody"><p>Pure, unit-tested checks of the seven rules above. Returns the list of broken rules (empty = valid).</p><p class="ref">PRD: Replan My Schedule (enforced rules)</p></div></details>
+  <details><summary>Replan workflow <span class="chip c-be">services/replan.js</span></summary><div class="dbody"><p>Cheap on-track check (nothing missed, partial, unconfirmed or edited → no AI call) → gather inputs → AI planner → validate with one repair attempt → diff old vs. new into affected sessions → save pending → later accept or discard. An identical proposal also returns “on track”.</p><p class="ref">PRD: Replan My Schedule, Unconfirmed sessions, States and Boundaries</p></div></details>
+</section>
+
+<section id="data">
+  <h2>Data model</h2>
+  <p class="sub">One collection, one document, minutes as the unit, dates as <code>YYYY-MM-DD</code>.</p>
+  <div class="card">
+<pre><code>StudyPlan {
+  key: "demo"                                   // one document only
+  demoDayOffset: Number                         // demo clock
+  availability: { mon … sun }                   // minutes per weekday
+  subjects: [{ id, name, examDate,
+               topics: [{ id, name, estimatedMinutes,
+                          difficulty 1-5, confidence 1-5 }] }]
+  sessions: [{ id, topicId, date, plannedMinutes,
+               priority, status: planned|completed|skipped|partial,
+               actualMinutes?, confidenceAfter? }]
+  notScheduled: [{ topicId, minutes, reason }]
+  explanation: String
+  editedSinceLastPlan: Boolean
+  pendingReplan: null | { sessions, notScheduled, affected, summary, explanation }
+}</code></pre>
+  </div>
+  <div class="grid" style="margin-top:14px">
+    <div class="card"><b>Unconfirmed is not stored</b><p style="margin:6px 0 0;color:var(--muted)">It's worked out each time: date before the app date and status still “planned”.</p></div>
+    <div class="card"><b>Credited work</b><p style="margin:6px 0 0;color:var(--muted)">Completed credits actual (or planned) minutes; partial credits actual minutes; skipped and Unconfirmed credit nothing. Remaining = estimate − credited.</p></div>
+    <div class="card"><b>Accept</b><p style="margin:6px 0 0;color:var(--muted)">Replaces all still-planned sessions dated today or later with the proposal; keeps history. Past Unconfirmed sessions stay Unconfirmed.</p></div>
+    <div class="card"><b>Start Over</b><p style="margin:6px 0 0;color:var(--muted)">Deletes the document (and resets the demo clock).</p></div>
+    <div class="card"><b>Actual-time rules</b><p style="margin:6px 0 0;color:var(--muted)"><code>actualMinutes</code> must be between 0 and <code>plannedMinutes</code>. Completed with no time entered credits the planned minutes. Partial requires <code>actualMinutes</code> and credits exactly that. Enforced by the backend.</p></div>
+  </div>
+</section>
+
+<section id="files">
+  <h2>File structure</h2>
+  <div class="card">
+<div class="tree">studyflow-ai/
+├── client/                         # Next.js (App Router, plain JS)
+│   ├── app/  layout.js · page.js · globals.css
+│   ├── components/  OnboardingFlow · Dashboard · SessionCard
+│   │                SettingsPanel · ReplanConfirmDialog · ReplanReview
+│   │                DemoClockControl · StartOver
+│   ├── lib/api.js                  # fetch wrapper
+│   └── .env.local.example          # NEXT_PUBLIC_API_URL
+├── server/                         # Express API
+│   ├── src/  index.js · app.js
+│   │   ├── routes/plan.js
+│   │   ├── models/StudyPlan.js
+│   │   └── services/  scheduling · validator · aiPlanner · replan
+│   ├── scripts/ai-smoke.js         # prove the Gemini call returns valid JSON
+│   ├── test/  validator.test · scheduling.test · fixtures/canonical.js
+│   └── .env.example                # MONGODB_URI, GEMINI_API_KEY, GEMINI_MODEL, PORT, CLIENT_ORIGIN
+├── devpost/                        # Devpost learning workspace
+├── package.json · .gitignore · LICENSE · README.md</div>
+  </div>
+</section>
+
+<section id="fail">
+  <h2>Important failure modes</h2>
+  <div class="grid">
+    <div class="card"><b>Gemini slow, rate-limited or down</b><p style="margin:6px 0 0;color:var(--muted)">Original plan unchanged. “We couldn't generate your revised plan. Your current schedule is safe—please try again.” + Retry. Request timeout. No progress lost.</p></div>
+    <div class="card"><b>AI returns invalid or rule-breaking JSON</b><p style="margin:6px 0 0;color:var(--muted)">One automatic repair attempt; then the same failure message. The bad proposal is never shown or saved.</p></div>
+    <div class="card"><b>Backend or Atlas unreachable</b><p style="margin:6px 0 0;color:var(--muted)">“Can't reach the server. Check that it is running.” Each change is one save to one document, so nothing is half-saved.</p></div>
+    <div class="card"><b>Replan when nothing changed</b><p style="margin:6px 0 0;color:var(--muted)">“You're on track!” with no AI call; also if the AI's proposal equals the current plan.</p></div>
+  </div>
+</section>
+
+<section id="decide">
+  <h2>Simplifications and decisions</h2>
+  <div class="card">
+    <b>What was simplified</b>
+    <ul class="plain">
+      <li>One embedded document, no accounts.</li>
+      <li>Next.js only as a React frontend; Express does all backend work.</li>
+      <li>One AI code path for generate and replan (no separate hand-written scheduler): one AI call per plan or replan, with at most one additional repair attempt if validation fails.</li>
+      <li>No streaming, queues or background jobs.</li>
+      <li>The backend computes the numbers and the affected-session diff; the AI doesn't.</li>
+      <li>Plain CSS, plain JavaScript, no UI kit.</li>
+      <li>Tests use a canned AI response (test fixture only). The running app and the demo always call the real AI.</li>
+    </ul>
+  </div>
+
+  <div class="flag" style="margin-top:14px"><b>Needs your explicit agreement (my additions)</b>
+    <ol class="rules">
+      <li><b>Demo clock.</b> A labeled control that advances the app date by a day. Without it, “miss Day 1, replan on Day 2” can't be shown in one sitting. Not in the PRD. Alternative: a seed script that inserts the scenario already at Day 2, labeled as sample data.</li>
+      <li><b>JavaScript, not TypeScript</b>, and <b>one embedded document</b>.</li>
+      <li><b>Auto repair attempt</b>: one retry with the broken rules listed before showing the failure message.</li>
+    </ol>
+  </div>
+
+  <div class="card key" style="margin-top:14px">
+    <b>Your learning focus: “everything about AI integration”</b>
+    <p style="margin:6px 0 0">That is too big for one step, so the agreed small investigation is a <b>smoke script</b> in the first build slice. It sends the canonical scenario to Gemini with the JSON schema, prints the raw answer, runs it through the validator, and also feeds a deliberately broken answer to the validator. <b>Evidence it worked:</b> a valid answer passes, a broken one is rejected naming the specific rule, and you can say in your own words why the AI's answer is never trusted directly. It also verifies the “verify” items.</p>
+  </div>
+
+  <div class="card" style="margin-top:14px">
+    <b>Still open (carried to the build)</b>
+    <ul class="plain">
+      <li>The “verify” items: Next.js version, Gemini model name (default guess <code>gemini-2.5-flash</code>, one env variable), SDK call shape, free-tier limits and terms, Atlas M0 availability.</li>
+      <li>License choice (MIT default) and any optional hosting: decided in <code>6-ship</code>.</li>
+      <li>Session time: a completed session may omit actual time and then credits its planned minutes; a partially completed session must include actual minutes between 0 and its planned duration. Enforced by the backend.</li>
+    </ul>
+  </div>
+</section>
+
+<section>
+  <div class="card next">
+    <h2>Your review</h2>
+    <p style="margin:6px 0 0">Read through, then tell me in the chat: <b>“looks good”</b> to approve (that also agrees to the three flagged additions), or what to change. <code>devpost/spec.md</code> is the canonical version; this page is regenerated after any change.</p>
+  </div>
+</section>
+
+<footer>StudyFlow AI · spec companion · works offline; scripts only power the journey stepper</footer>
+</div>
+
+<script>
+(function () {
+  document.documentElement.classList.add('js');
+  var panels = document.querySelectorAll('.step-panel');
+  var count = document.getElementById('stepcount');
+  var cur = 0;
+  var all = ['n-web','n-routes','n-replan','n-ai','n-val','n-store','n-db','n-gem'];
+  function clearHl() {
+    all.forEach(function (id) {
+      var g = document.getElementById(id); if (!g) return;
+      var r = g.querySelector('rect'); r.classList.remove('hl', 'hl-fill');
+    });
+  }
+  function go(i) {
+    cur = Math.max(0, Math.min(panels.length - 1, i));
+    panels.forEach(function (p, k) { p.hidden = k !== cur; });
+    clearHl();
+    (panels[cur].dataset.hl || '').split(',').forEach(function (id) {
+      var g = document.getElementById(id.trim()); if (g) g.querySelector('rect').classList.add('hl', 'hl-fill');
+    });
+    count.textContent = 'Step ' + (cur + 1) + ' of ' + panels.length;
+  }
+  document.getElementById('prev').addEventListener('click', function () { go(cur - 1); });
+  document.getElementById('next').addEventListener('click', function () { go(cur + 1); });
+  go(0);
+})();
+</script>
+</body>
+</html>

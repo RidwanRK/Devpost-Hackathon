@@ -1,0 +1,322 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>StudyFlow AI — Scope</title>
+<style>
+  :root {
+    --bg: #f6f7fb; --surface: #ffffff; --ink: #1b2033; --muted: #5b637a; --line: #e3e6f0;
+    --brand: #4f46e5; --brand-soft: #eceafe; --good: #0f9d6b; --good-soft: #e2f6ee;
+    --warn: #c2760a; --warn-soft: #fdf1dc; --cut: #d1344f; --cut-soft: #fde8ec;
+    --shadow: 0 1px 2px rgba(20,25,50,.06), 0 6px 20px rgba(20,25,50,.06);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0f1220; --surface: #181c30; --ink: #eceefa; --muted: #a2a9c4; --line: #2a3050;
+      --brand: #8b85ff; --brand-soft: #25264d; --good: #3dd6a0; --good-soft: #14352c;
+      --warn: #f0b04a; --warn-soft: #3a2d12; --cut: #ff6f89; --cut-soft: #3b1822;
+      --shadow: none;
+    }
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { margin: 0; background: var(--bg); color: var(--ink);
+    font: 16px/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  a { color: var(--brand); }
+  .wrap { max-width: 960px; margin: 0 auto; padding: 0 16px 80px; }
+
+  header.hero { padding: 48px 0 24px; }
+  .badge { display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase;
+    background: var(--warn-soft); color: var(--warn); padding: 4px 10px; border-radius: 999px; }
+  h1 { font-size: clamp(2rem, 5vw, 3rem); line-height: 1.1; margin: 14px 0 8px; letter-spacing: -.02em; }
+  .tagline { font-size: 1.15rem; color: var(--muted); max-width: 640px; margin: 0; }
+
+  nav { position: sticky; top: 0; z-index: 5; background: color-mix(in srgb, var(--bg) 88%, transparent);
+    backdrop-filter: blur(8px); border-bottom: 1px solid var(--line); margin: 0 -16px 28px; padding: 10px 16px; }
+  nav ul { list-style: none; display: flex; gap: 6px; margin: 0; padding: 0; overflow-x: auto; }
+  nav a { display: block; white-space: nowrap; text-decoration: none; color: var(--muted); font-size: 14px; font-weight: 500;
+    padding: 6px 12px; border-radius: 999px; }
+  nav a:hover, nav a:focus-visible { background: var(--brand-soft); color: var(--brand); outline: none; }
+
+  section { margin: 0 0 40px; scroll-margin-top: 70px; }
+  h2 { font-size: 1.35rem; margin: 0 0 4px; letter-spacing: -.01em; }
+  .sub { color: var(--muted); margin: 0 0 16px; }
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 20px; box-shadow: var(--shadow); }
+  .grid2 { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+
+  .kernel { background: linear-gradient(135deg, var(--brand), #7c5cff); color: #fff; border: 0; }
+  .kernel h2 { color: #fff; }
+  .kernel p { margin: 6px 0 0; font-size: 1.05rem; }
+  .kernel .big { font-size: 1.35rem; font-weight: 700; line-height: 1.3; margin-top: 8px; }
+
+  figure { margin: 0; }
+  figcaption { color: var(--muted); font-size: 14px; margin-top: 8px; }
+  svg text { font-family: inherit; }
+  .diagram { width: 100%; height: auto; display: block; }
+  .d-box { fill: var(--surface); stroke: var(--line); stroke-width: 1.5; }
+  .d-brand { fill: var(--brand-soft); stroke: var(--brand); stroke-width: 1.5; }
+  .d-good { fill: var(--good-soft); stroke: var(--good); stroke-width: 1.5; }
+  .d-t { fill: var(--ink); font-size: 14px; font-weight: 600; }
+  .d-s { fill: var(--muted); font-size: 12px; }
+  .d-arrow { stroke: var(--muted); stroke-width: 2; fill: none; }
+  .d-loop { stroke: var(--brand); stroke-width: 2.5; fill: none; }
+  .d-ah { fill: var(--muted); }
+  .d-ah-b { fill: var(--brand); }
+
+  .steps { counter-reset: s; list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
+  .steps li { counter-increment: s; display: flex; gap: 12px; align-items: flex-start; }
+  .steps li::before { content: counter(s); flex: none; width: 28px; height: 28px; border-radius: 50%;
+    background: var(--brand-soft); color: var(--brand); font-weight: 700; display: grid; place-items: center; font-size: 14px; }
+
+  /* before / after demo */
+  .tabs { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
+  .tabs button { font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; padding: 8px 14px; border-radius: 10px;
+    border: 1px solid var(--line); background: var(--surface); color: var(--muted); }
+  .tabs button[aria-selected="true"] { background: var(--brand); border-color: var(--brand); color: #fff; }
+  .tabs button:focus-visible { outline: 3px solid var(--brand-soft); outline-offset: 2px; }
+  .plans { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+  .plan h3 { margin: 0 0 8px; font-size: 1rem; }
+  .plan[hidden] { display: none; }
+  .sess { display: flex; justify-content: space-between; gap: 10px; align-items: center; padding: 9px 12px; margin: 6px 0;
+    border-radius: 10px; border: 1px solid var(--line); font-size: 14px; background: var(--bg); }
+  .sess b { font-weight: 600; }
+  .sess small { color: var(--muted); display: block; }
+  .tag { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 999px; white-space: nowrap; }
+  .t-done { background: var(--good-soft); color: var(--good); }
+  .t-skip { background: var(--cut-soft); color: var(--cut); }
+  .t-new  { background: var(--brand-soft); color: var(--brand); }
+  .t-move { background: var(--warn-soft); color: var(--warn); }
+  .explain { margin-top: 12px; padding: 14px; border-radius: 12px; background: var(--brand-soft); font-size: 14px; }
+  .explain b { color: var(--brand); }
+
+  /* scope reveals */
+  details { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; margin: 0 0 12px; box-shadow: var(--shadow); overflow: hidden; }
+  summary { cursor: pointer; list-style: none; padding: 16px 18px; display: flex; align-items: center; gap: 12px; font-weight: 600; }
+  summary::-webkit-details-marker { display: none; }
+  summary::after { content: "+"; margin-left: auto; font-size: 22px; line-height: 1; color: var(--muted); transition: transform .15s; }
+  details[open] > summary::after { content: "–"; }
+  summary:focus-visible { outline: 3px solid var(--brand-soft); outline-offset: -3px; }
+  summary .count { font-weight: 500; color: var(--muted); font-size: 14px; }
+  .pill { font-size: 12px; font-weight: 700; padding: 3px 10px; border-radius: 999px; text-transform: uppercase; letter-spacing: .05em; }
+  .p-now { background: var(--good-soft); color: var(--good); }
+  .p-later { background: var(--warn-soft); color: var(--warn); }
+  .p-cut { background: var(--cut-soft); color: var(--cut); }
+  details > .body { padding: 0 18px 16px; border-top: 1px solid var(--line); }
+  .body ul { margin: 12px 0 0; padding-left: 0; list-style: none; display: grid; gap: 8px; }
+  .body li { display: flex; gap: 10px; align-items: flex-start; }
+  .body li::before { content: ""; flex: none; width: 8px; height: 8px; border-radius: 50%; margin-top: 9px; background: currentColor; opacity: .6; }
+  .why { color: var(--muted); font-size: 14px; }
+
+  .quote { border-left: 4px solid var(--brand); padding: 4px 0 4px 16px; color: var(--muted); font-style: italic; margin: 12px 0 0; }
+  .next { background: var(--good-soft); border-color: var(--good); }
+  footer { color: var(--muted); font-size: 13px; text-align: center; margin-top: 48px; }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="hero">
+  <span class="badge" style="background:var(--good-soft);color:var(--good)">Scope · Approved</span>
+  <h1>StudyFlow AI</h1>
+  <p class="tagline">An AI exam-study planner whose plan adapts when you fall behind, instead of breaking.</p>
+</header>
+
+<nav aria-label="Sections">
+  <ul>
+    <li><a href="#kernel">Kernel</a></li>
+    <li><a href="#user">Who it's for</a></li>
+    <li><a href="#loop">Core loop</a></li>
+    <li><a href="#proof">Proof</a></li>
+    <li><a href="#boundary">Now · Later · Cut</a></li>
+    <li><a href="#why">Why it matters</a></li>
+    <li><a href="#review">Review</a></li>
+  </ul>
+</nav>
+
+<section id="kernel">
+  <div class="card kernel">
+    <h2>The unique kernel</h2>
+    <p class="big">A study plan shouldn't break when life gets in the way. It should adapt.</p>
+    <p>Press <strong>Replan My Schedule</strong> and the AI looks at what you <em>actually</em> did (completed, skipped, partly done, real time spent) and rebuilds the rest of the plan. It doesn't blindly push everything to tomorrow. It protects weak, high-stakes topics, postpones what can wait, avoids unrealistic workloads, and explains the trade-offs honestly when there isn't enough time.</p>
+  </div>
+</section>
+
+<section id="user">
+  <h2>Who it's for, and how it flows</h2>
+  <p class="sub">A university student juggling several courses and exams, like you: a Software Engineering student whose fixed timetable falls apart the first time a topic runs long.</p>
+  <div class="card">
+    <figure>
+      <svg class="diagram" viewBox="0 0 900 300" role="img" aria-labelledby="dt1 dd1">
+        <title id="dt1">From student to adaptive plan</title>
+        <desc id="dd1">The student enters exams, topics, difficulty, confidence and hours. The AI builds a daily plan. The student logs progress. When behind, Replan My Schedule sends progress back to the AI, which produces a revised plan with explanations.</desc>
+        <defs>
+          <marker id="a1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" class="d-ah"/></marker>
+          <marker id="a2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" class="d-ah-b"/></marker>
+        </defs>
+        <!-- student -->
+        <rect class="d-box" x="10" y="95" width="170" height="110" rx="14"/>
+        <circle cx="95" cy="128" r="14" fill="none" stroke="currentColor" stroke-width="0"/>
+        <text class="d-t" x="95" y="132" text-anchor="middle">Student</text>
+        <text class="d-s" x="95" y="152" text-anchor="middle">Enters exams, topics,</text>
+        <text class="d-s" x="95" y="168" text-anchor="middle">difficulty, confidence,</text>
+        <text class="d-s" x="95" y="184" text-anchor="middle">study hours</text>
+        <!-- AI plan -->
+        <rect class="d-brand" x="260" y="95" width="170" height="110" rx="14"/>
+        <text class="d-t" x="345" y="132" text-anchor="middle">AI builds plan</text>
+        <text class="d-s" x="345" y="152" text-anchor="middle">Daily sessions,</text>
+        <text class="d-s" x="345" y="168" text-anchor="middle">weak topics first</text>
+        <!-- dashboard -->
+        <rect class="d-box" x="510" y="95" width="170" height="110" rx="14"/>
+        <text class="d-t" x="595" y="132" text-anchor="middle">Dashboard</text>
+        <text class="d-s" x="595" y="152" text-anchor="middle">Complete · Skip ·</text>
+        <text class="d-s" x="595" y="168" text-anchor="middle">Partially Done + time</text>
+        <!-- replan -->
+        <rect class="d-good" x="730" y="95" width="160" height="110" rx="14"/>
+        <text class="d-t" x="810" y="132" text-anchor="middle">Revised plan</text>
+        <text class="d-s" x="810" y="152" text-anchor="middle">+ what moved</text>
+        <text class="d-s" x="810" y="168" text-anchor="middle">and why</text>
+        <!-- arrows -->
+        <path class="d-arrow" d="M180 150H258" marker-end="url(#a1)"/>
+        <path class="d-arrow" d="M430 150H508" marker-end="url(#a1)"/>
+        <path class="d-arrow" d="M680 150H728" marker-end="url(#a1)"/>
+        <text class="d-s" x="704" y="140" text-anchor="middle">behind?</text>
+        <!-- loop back -->
+        <path class="d-loop" d="M810 205V260H345V207" marker-end="url(#a2)"/>
+        <text class="d-t" x="578" y="252" text-anchor="middle" style="fill:var(--brand)">Replan My Schedule: real progress goes back to the AI</text>
+      </svg>
+      <figcaption>The loop on the bottom is the whole point of the project.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section id="loop">
+  <h2>The core adaptation loop</h2>
+  <p class="sub">What the student does over and over, and why they come back: it always tells them what to do <em>next</em>, not what they've missed.</p>
+  <div class="grid2">
+    <div class="card">
+      <ol class="steps">
+        <li><span>Open the dashboard and see <strong>today's study sessions</strong>.</span></li>
+        <li><span>Mark each session <strong>Complete</strong>, <strong>Skip</strong>, or <strong>Partially Done</strong>.</span></li>
+        <li><span>Enter the <strong>actual time spent</strong> and update <strong>confidence</strong> in the topic.</span></li>
+        <li><span>Behind? Click <strong>Replan My Schedule</strong>.</span></li>
+        <li><span>Read the revised schedule: changed tasks, new time allocations, and <strong>why</strong>.</span></li>
+      </ol>
+    </div>
+    <div class="card">
+      <h3 style="margin-top:0">What the AI weighs</h3>
+      <ul style="margin:0;padding-left:20px">
+        <li>Upcoming exam dates</li>
+        <li>Topic difficulty and your confidence</li>
+        <li>What was completed, skipped or partly done</li>
+        <li>Actual time spent vs. planned</li>
+        <li>Study hours still available</li>
+      </ul>
+      <p class="why" style="margin-bottom:0">If there isn't enough time, it says so and explains the trade-offs honestly.</p>
+    </div>
+  </div>
+</section>
+
+<section id="proof">
+  <h2>The proof: what “working” looks like</h2>
+  <p class="sub">The demo moment. Example: Database Systems exam in 2 days, 6 hours of material left, only 4 hours available. Switch between views, or compare them side by side.</p>
+  <div class="card">
+    <div class="tabs" role="tablist" aria-label="Demo view">
+      <button role="tab" aria-selected="true" data-view="both">Side by side</button>
+      <button role="tab" aria-selected="false" data-view="before">Original plan</button>
+      <button role="tab" aria-selected="false" data-view="after">After replan</button>
+    </div>
+    <div class="plans">
+      <div class="plan" id="plan-before">
+        <h3>Original plan: Day 1</h3>
+        <div class="sess"><span><b>Transaction scheduling</b><small>Weak · 2h planned</small></span><span class="tag t-skip">Skipped</span></div>
+        <div class="sess"><span><b>Normalization</b><small>Weak · 2h planned</small></span><span class="tag t-done">Planned</span></div>
+        <div class="sess"><span><b>Database architecture</b><small>Strong · 1h planned</small></span><span class="tag t-done">Planned</span></div>
+        <div class="sess"><span><b>Indexing basics</b><small>Medium · 1h planned</small></span><span class="tag t-done">Planned</span></div>
+        <p class="why">A missed session: transaction scheduling was skipped. Now only 4 hours remain for 6 hours of material.</p>
+      </div>
+      <div class="plan" id="plan-after">
+        <h3>After “Replan My Schedule”</h3>
+        <div class="sess"><span><b>Transaction scheduling</b><small>Weak · 2h</small></span><span class="tag t-new">Top priority</span></div>
+        <div class="sess"><span><b>Normalization</b><small>Weak · 2h</small></span><span class="tag t-new">Kept</span></div>
+        <div class="sess"><span><b>Indexing basics</b><small>Medium · key concepts only</small></span><span class="tag t-move">Shortened</span></div>
+        <div class="sess"><span><b>Database architecture</b><small>Strong</small></span><span class="tag t-move">Moved after exam</span></div>
+        <div class="explain"><b>Why:</b> “I prioritized transaction scheduling and normalization because they are your weakest topics. I moved database architecture revision to after the exam because you already have a strong understanding of it. You still have about two hours of high-priority material remaining, so review the most important concepts first.”</div>
+      </div>
+    </div>
+    <p class="why">Proof = the original schedule, a missed session and the revised schedule, with visible changes in priorities, deadlines and remaining workload. The AI responds to real progress; it isn't another generic timetable.</p>
+  </div>
+</section>
+
+<section id="boundary">
+  <h2>Proof-of-concept boundary: Now · Later · Cut</h2>
+  <p class="sub">Expand each group. To change anything, tell me which item should move and I'll update the scope.</p>
+
+  <details open>
+    <summary><span class="pill p-now">Now</span> In the proof of concept <span class="count">· 6 items</span></summary>
+    <div class="body"><ul style="color:var(--good)">
+      <li style="color:var(--ink)"><span><strong>Scope:</strong> exam preparation and topics only.</span></li>
+      <li style="color:var(--ink)"><span><strong>Inputs:</strong> subjects, exam dates, topics, difficulty, confidence, available study hours.</span></li>
+      <li style="color:var(--ink)"><span><strong>AI daily plan</strong> built from those inputs, weak topics first.</span></li>
+      <li style="color:var(--ink)"><span><strong>Session tracking:</strong> Complete / Skip / Partially Done, plus actual time spent and confidence updates.</span></li>
+      <li style="color:var(--ink)"><span><strong>Replan My Schedule:</strong> adjusts the remaining plan from real progress and explains what changed and why.</span></li>
+      <li style="color:var(--ink)"><span><strong>Browser local storage</strong> so the plan and progress survive between visits. <span class="why">(Built on the MERN stack, so <code>4-spec</code> decides whether MongoDB is needed for this.)</span></span></li>
+    </ul></div>
+  </details>
+
+  <details>
+    <summary><span class="pill p-later">Later</span> Worth doing, just not now <span class="count">· 5 items</span></summary>
+    <div class="body"><ul style="color:var(--warn)">
+      <li style="color:var(--ink)"><span><strong>Assignments</strong> and other deadlines.</span></li>
+      <li style="color:var(--ink)"><span><strong>Personal learning goals</strong> (skills outside the curriculum).</span></li>
+      <li style="color:var(--ink)"><span><strong>Advanced analytics.</strong></span></li>
+      <li style="color:var(--ink)"><span><strong>Notifications.</strong></span></li>
+      <li style="color:var(--ink)"><span><strong>Collaborative features.</strong></span></li>
+    </ul>
+    <p class="why">None of these are needed to prove that the plan adapts to real progress.</p></div>
+  </details>
+
+  <details>
+    <summary><span class="pill p-cut">Cut</span> Explicitly left out <span class="count">· 1 item</span></summary>
+    <div class="body"><ul style="color:var(--cut)">
+      <li style="color:var(--ink)"><span><strong>User accounts.</strong> <span class="why">Unnecessary for a first version. Local storage is enough for one student's plan, and the priority is proving the plan adapts, not building a full productivity platform.</span></span></li>
+    </ul></div>
+  </details>
+</section>
+
+<section id="why">
+  <h2>Why this matters</h2>
+  <div class="card">
+    <p style="margin-top:0">Balancing courses, assignments, exams and extra skills is hard, and a schedule quickly becomes unrealistic when one topic runs long or something else comes up. This is also your chosen way to practice <strong>integrating AI</strong> into a real app.</p>
+    <p class="quote">“Students need more than a fixed timetable; they need a practical way to recover when they fall behind and focus on what matters most. I want to use AI to make study planning more realistic, flexible, and less stressful.”</p>
+    <p class="why"><strong>Stack:</strong> MERN (MongoDB, Express, React, Node), your choice, carried to <code>4-spec</code>.</p>
+    <p class="why" style="margin-bottom:0"><strong>Look and feel:</strong> a clean dashboard that says what to do next, calm and honest in tone. Nothing more specified yet; <code>3-prd</code> will fill the gaps.</p>
+  </div>
+</section>
+
+<section id="review">
+  <div class="card next">
+    <h2>Approved</h2>
+    <p style="margin:6px 0 0">You approved this scope. To reopen it, tell me what you'd change (for example, move an item between Now / Later / Cut). The Markdown file <code>devpost/scope.md</code> is the canonical version; this page is a companion and will be regenerated after any change.</p>
+  </div>
+</section>
+
+<footer>StudyFlow AI · scope companion · works offline, no scripts needed except the demo tabs</footer>
+</div>
+
+<script>
+  (function () {
+    var tabs = document.querySelectorAll('.tabs [role="tab"]');
+    var before = document.getElementById('plan-before');
+    var after = document.getElementById('plan-after');
+    function show(view) {
+      before.hidden = view === 'after';
+      after.hidden = view === 'before';
+      tabs.forEach(function (t) { t.setAttribute('aria-selected', String(t.dataset.view === view)); });
+    }
+    tabs.forEach(function (t) { t.addEventListener('click', function () { show(t.dataset.view); }); });
+  })();
+</script>
+</body>
+</html>
