@@ -19,7 +19,7 @@ Build mode: fast
   Learner check: Put your Gemini key in `server/.env`, run the smoke script, and tell me in your own words why the first answer was accepted and the broken one rejected, and why the AI's answer is never trusted directly.
   Commit: `Add scheduling helpers, validator and Gemini smoke script`
 
-- [ ] **2. Enter the demo scenario in the browser and get a saved plan**
+- [x] **2. Enter the demo scenario in the browser and get a saved plan**
   Becomes usable: Open the app, go through the step-by-step setup (subjects, exam date and topics, availability), click Generate My Study Plan, and land on a dashboard showing today's sessions and upcoming exams. Refresh the page and the plan is still there.
   Why now: The first full path through all three pieces (website, Express, Atlas, plus the AI). It makes the app real, gives the learner something to try and react to, and everything after this builds on a saved plan.
   PRD ref: `prd.md > The Core Journey` (steps 1-3), `prd.md > Setup and availability`, `prd.md > Plan generation`, `prd.md > Screens and Layout` (Onboarding flow, Dashboard), `prd.md > States and Boundaries` (First use, Normal use, What persists), `prd.md > Look and Feel`
@@ -59,15 +59,15 @@ Build mode: fast
   Learner check: Click Replan with a fully on-track plan and confirm you see "You're on track!". Then temporarily put a wrong Gemini key in `server/.env`, click Replan after missing a session, and confirm you see the failure message with Retry and your plan unchanged.
   Commit: `Add on-track, failure and retry handling to replan`
 
-- [ ] **6. Edit your plan inputs and Start Over**
-  Becomes usable: From Settings / Edit you can change availability, add a topic, change an exam date, and update difficulty or confidence, and the next replan uses those edits. Start Over clears everything (and resets the demo clock) after a confirmation.
+- [ ] **6. Edit your plan inputs**
+  Becomes usable: From Settings / Edit you can change availability, add a topic, change an exam date, and update difficulty or confidence, and the next replan uses those edits. (Start Over was built in slice 2; it also resets the demo clock once the clock exists, added in slice 3.)
   Why now: Both are PRD-required but they sit around the critical path, so they come after it is solid. Start Over is also what makes repeated demo recordings practical.
   PRD ref: `prd.md > Setup and availability` (editing after setup), `prd.md > Start Over (Reset Demo)`
   Spec ref: `spec.md > Components` (SettingsPanel, StartOver), `spec.md > Data Model` (`editedSinceLastPlan`), `spec.md > External Services and Dependencies` (`PATCH /settings`, `DELETE /plan`)
   Build: `PATCH /settings` setting `editedSinceLastPlan`, `SettingsPanel`, `DELETE /plan`, `StartOver` with a confirmation, and making an edited plan count as "changed" so Replan doesn't say on-track.
   Verify (mechanical): Tests/API calls show an exam-date or topic edit is saved, sets the edited flag, and that Replan then goes to the AI; `DELETE /plan` leaves `GET /plan` returning `null` and the clock back at zero.
   Learner check: Add a topic and change another topic's confidence in Settings, click Replan and confirm it doesn't say on-track; then use Start Over, confirm, and check that you're back at the welcome screen.
-  Commit: `Add settings editing and Start Over`
+  Commit: `Add settings editing`
 
 - [ ] **7. Run the whole demo from a fresh start using the README**
   Becomes usable: Anyone (and the learner on a fresh clone) can follow the README, run the app, and reproduce the canonical demo scenario end to end with a calm, polished look matching the PRD.
@@ -105,3 +105,4 @@ Activity mode: [live app and editor, explicit static fallback, focused alternati
 
 - Default Gemini model changed from `gemini-2.5-flash` to `gemini-3.5-flash-lite`, and the structured-output config is `responseMimeType` plus `responseJsonSchema` — the build found the 2.5 models are access-restricted for new users; the live smoke run confirmed the new default returns valid JSON for the canonical scenario. Still one line to change via `GEMINI_MODEL`.
 - Study days run from today up to the day before the last exam (the exam day is not a study day), and work already done today reduces that day's availability — needed so the canonical "Day 4 exam, 3 days of 2 hours" fits exactly.
+- Start Over (`DELETE /plan`, `StartOver` component) moved from slice 6 into slice 2 — without it the learner cannot redo the setup while trying the app at the first hands-on checkpoint. Slice 6 now covers Settings / Edit only; slice 3 makes Start Over reset the demo clock.
